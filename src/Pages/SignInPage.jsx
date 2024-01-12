@@ -26,11 +26,8 @@ const SignInPage = () => {
 
     try {
       const loggedUser = await signInWithEmailAndPassword(auth, inputEmail, inputPassword);
-
-      // const userInfo = loggedUser.user.uid;
-      // console.log(userInfo);
       setErrorMessage('');
-      navigate('/');
+      navigate('/admin');
     } catch (err) {
       console.log(err);
       setErrorMessage(err.message);

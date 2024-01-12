@@ -8,6 +8,10 @@ import ItemDetailPage from './Pages/ItemDetailPage';
 import CreatePostPage from './Pages/CreatePostPage';
 import AboutUsPage from './Pages/AboutUsPage';
 
+import AdminDashboardPage from './Pages/Admin/DashboardPage';
+import AdminUsersPage from './Pages/Admin/UsersPage';
+import AdminPropertyPage from './Pages/Admin/PropertyPage';
+
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path='/'>
@@ -18,6 +22,14 @@ const router = createBrowserRouter(
       <Route path='create-post' element={<CreatePostPage />} />
       <Route path='item/:id' element={<ItemDetailPage />} />
       <Route path='about-us' element={<AboutUsPage />} />
+
+      <Route path='admin'>
+        <Route index element={<AdminDashboardPage />} />
+        <Route path='dashboard' element={<AdminDashboardPage />} />
+        <Route path='users' element={<AdminUsersPage />} />
+        <Route path='properties' element={<AdminPropertyPage />} />
+        <Route path='create-post' element={<CreatePostPage />} />
+      </Route>
     </Route>
   )
 );

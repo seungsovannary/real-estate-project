@@ -1,15 +1,13 @@
 import { useEffect } from 'react';
-import Footer from '../components/Footer';
 import Nav from '../components/Nav';
-import { supabase } from '..';
+import Sidebar from '../components/Sidebar';
 import { useDispatch } from 'react-redux';
 import { logIn } from '../redux/slices/authSlice';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../config/firebaseconfig';
-import { current } from '@reduxjs/toolkit';
 import { doc, onSnapshot } from 'firebase/firestore';
 
-function MainLayout({ children }) {
+function AdminLayout({ children }) {
   const dispatch = useDispatch();
   useEffect(() => {
     onAuthStateChanged(auth, (currentUser) => {
@@ -33,12 +31,14 @@ function MainLayout({ children }) {
   return (
     <div>
       <Nav />
-      <div className='mt-[68px]'>
-        {children}
+      <Sidebar />
+      <div class="p-4 sm:ml-64 mt-[68px]">
+        <div class="p-4">
+          {children}
+        </div>
       </div>
-      <Footer />
     </div>
   );
 }
 
-export default MainLayout;
+export default AdminLayout;
