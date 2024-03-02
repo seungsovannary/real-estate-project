@@ -1,34 +1,47 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Footer from '../components/Footer';
 import Nav from '../components/Nav';
 import { supabase } from '..';
 import { useDispatch } from 'react-redux';
 import { logIn } from '../redux/slices/authSlice';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth, db } from '../config/firebaseconfig';
 import { current } from '@reduxjs/toolkit';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { useSelector } from 'react-redux';
 
 function MainLayout({ children }) {
   const dispatch = useDispatch();
-  useEffect(() => {
-    onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
-        onSnapshot(doc(db, 'users', currentUser?.uid), (doc) => {
-          console.log('Current user: ', doc.data());
-          const user = doc.data();
-          dispatch(
-            logIn({
-              userName: user.lastName + ' ' + user.firstName,
-              userEmail: user.email,
-              userRole: user.role,
-              userId: currentUser?.uid,
-            })
-          );
-        });
+  const [loading, SetLoading] = useState(false);
+  const user = useSelector((state) => state.auth.value);
+
+  const getMe = async () => {
+    if (user.isLoggedIn) {
+      return;
+    }
+
+    const url = 'http://localhost:8000/api/me';
+    const accessToken = localStorage.getItem("access_token");
+
+    await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${accessToken}`
       }
-    });
+    })
+      .then(response => response.json())
+      .then(async data => {
+        // Do something with the response data
+        dispatch(logIn({ email: data.email, id: data.id, role: "admin" }));
+        SetLoading(true);
+      });
+  }
+
+  useEffect(() => {
+    getMe();
   }, []);
+
+  if (!loading && !user.isLoggedIn) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div>

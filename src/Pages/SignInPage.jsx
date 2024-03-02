@@ -4,9 +4,6 @@ import MainLayout from '../Layouts/MainLayout';
 import { logIn } from '../redux/slices/authSlice';
 import { useState } from 'react';
 
-import { supabase } from '../index';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../config/firebaseconfig';
 
 const SignInPage = () => {
   const dispatch = useDispatch();
@@ -24,17 +21,22 @@ const SignInPage = () => {
       password: inputPassword,
     };
 
-    try {
-      const loggedUser = await signInWithEmailAndPassword(auth, inputEmail, inputPassword);
-      setErrorMessage('');
-      navigate('/admin');
-    } catch (err) {
-      console.log(err);
-      setErrorMessage(err.message);
-    }
-
-    // dispatch(logIn({ userName: 'Seung Sovannary', userId: userInfo.id, userEmail: userInfo.email }));
-    // navigate('/');
+    return fetch("http://localhost:8000/api/login", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(logInRequest)
+    }).then(response => response.json())
+      .then(data => {
+        if (data.access_token) {
+          localStorage.setItem("access_token", data.access_token);
+          navigate('/');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
   };
 
   return (

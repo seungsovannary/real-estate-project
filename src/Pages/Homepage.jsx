@@ -15,6 +15,18 @@ function Homepage() {
   const dbCollectionRef = collection(db, 'posts');
   // console.log(user);
 
+  const getList = async () => {
+    return fetch('http://localhost:8000/api/users')
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+      })
+      .catch(error => {
+        // Handle any errors
+        console.error('Error:', error);
+      });
+  }
+
   useEffect(() => {
     onSnapshot(dbCollectionRef, (snapshot) => {
       let posts = [];
@@ -24,6 +36,7 @@ function Homepage() {
 
       setData(posts);
     });
+
   }, []);
 
   return (
