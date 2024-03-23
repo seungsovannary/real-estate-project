@@ -1,30 +1,31 @@
 
 import { useEffect, useState } from 'react';
-import { db } from '../../config/firebaseconfig';
 import AdminLayout from '../../Layouts/AdminLayout';
-import { collection, onSnapshot } from 'firebase/firestore';
 
 function UsersPage() {
   const [users, setUsers] = useState([]);
   const [backUp, setBackUpData] = useState([]);
   const [searchValue, setSearchValue] = useState('');
 
-  const usersCollection = collection(db, 'users');
+  const getList = async () => {
+    return fetch('http://localhost:8000/api/users')
+      .then(response => response.json())
+      .then(data => {
+        setUsers(data);
+      })
+      .catch(error => {
+        // Handle any errors
+        console.error('Error:', error);
+      });
+  }
 
   useEffect(() => {
-    onSnapshot(usersCollection, (snapshot) => {
-      let data = [];
-      snapshot.docs.forEach((doc) => {
-        data.push({ ...doc.data(), id: doc.id });
-      });
-      setUsers(data);
-      setBackUpData(data);
-    });
-  }, [])
+    getList();
+  }, []);
 
   const handleSearch = (e) => {
     setSearchValue(e.target.value);
-    setUsers(backUp.filter((item) => String(item.email).toLowerCase().includes(String(e.target.value).toLowerCase())));
+    // setUsers(backUp.filter((item) => String(item.email).toLowerCase().includes(String(e.target.value).toLowerCase())));
   };
 
   return (
@@ -48,7 +49,7 @@ function UsersPage() {
                 Name
               </th>
               <th scope="col" class="px-6 py-3">
-                Position
+                Role
               </th>
               <th scope="col" class="px-6 py-3">
                 Status
@@ -62,14 +63,15 @@ function UsersPage() {
             {users.map((user, index) => (
               <tr class="bg-white border-b  hover:bg-gray-50 ">
                 <th scope="row" class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap ">
-                  <img class="w-10 h-10 rounded-full" src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" alt="avatar" />
+                  { user.profile ? <img class="w-10 h-10 rounded-full" src={ user.profile } alt="avatar" />
+                  : <img class="w-10 h-10 rounded-full" src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" alt="avatar" /> }
                   <div class="ps-3">
-                    <div class="text-base font-semibold">{ user.firstName } { user.lastName }</div>
+                    <div class="text-base font-semibold">{ user.name }</div>
                     <div class="font-normal text-gray-500">{ user.email }</div>
                   </div>
                 </th>
                 <td class="px-6 py-4">
-                  {String(user.role).toUpperCase()}
+                  {String(user?.role?.name).toUpperCase()}
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex items-center">

@@ -3,24 +3,29 @@ import Footer from '../components/Footer';
 import Nav from '../components/Nav';
 import { supabase } from '..';
 import { useDispatch } from 'react-redux';
-import { logIn } from '../redux/slices/authSlice';
+import { logIn, logOut } from '../redux/slices/authSlice';
 import { current } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
-
 function MainLayout({ children }) {
   const dispatch = useDispatch();
   const [loading, SetLoading] = useState(false);
   const user = useSelector((state) => state.auth.value);
 
   const getMe = async () => {
-    if (user.isLoggedIn) {
+    if (user.id) {
+      SetLoading(false);
       return;
     }
 
     const url = 'http://localhost:8000/api/me';
     const accessToken = localStorage.getItem("access_token");
 
-    await fetch(url, {
+    if (!accessToken) {
+      dispatch(logOut());
+      return;
+    }
+
+    fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -30,8 +35,10 @@ function MainLayout({ children }) {
       .then(response => response.json())
       .then(async data => {
         // Do something with the response data
-        dispatch(logIn({ email: data.email, id: data.id, role: "admin" }));
+        dispatch(logIn({ email: data.email, id: data.id, role_id: data.role_id }));
         SetLoading(true);
+      }).catch((e) => {
+        dispatch(logOut());
       });
   }
 
@@ -39,7 +46,7 @@ function MainLayout({ children }) {
     getMe();
   }, []);
 
-  if (!loading && !user.isLoggedIn) {
+  if (loading && !user.id) {
     return <div>Loading...</div>;
   }
 

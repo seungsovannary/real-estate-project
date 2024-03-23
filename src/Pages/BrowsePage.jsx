@@ -1,8 +1,6 @@
 import MainLayout from '../Layouts/MainLayout';
 import ItemCard from '../components/ItemCard';
 import { useEffect, useState } from 'react';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '../config/firebaseconfig';
 
 const BrowsePage = () => {
   const [searchValue, setSearchValue] = useState('');
@@ -10,20 +8,22 @@ const BrowsePage = () => {
   const [data, setData] = useState([]);
   const [backUp, setBackUpData] = useState([]);
 
-  const dbCollectionRef = collection(db, 'posts');
-  // console.log(user);
+  const getList = async () => {
+    return fetch('http://localhost:8000/api/properties')
+      .then(response => response.json())
+      .then(data => {
+        setData(data);
+      })
+      .catch(error => {
+        // Handle any errors
+        console.error('Error:', error);
+      });
+  }
 
   useEffect(() => {
-    onSnapshot(dbCollectionRef, (snapshot) => {
-      let posts = [];
-      snapshot.docs.forEach((doc) => {
-        posts.push({ ...doc.data(), id: doc.id });
-      });
-
-      setData(posts);
-      setBackUpData(posts);
-    });
+    getList();
   }, []);
+
 
   const handleChangeType = (e) => {
     const inputType = e.target.value;

@@ -1,8 +1,6 @@
 import AdminLayout from '../../Layouts/AdminLayout';
 import ItemCard from '../../components/ItemCard';
 import { useEffect, useState } from 'react';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '../../config/firebaseconfig';
 
 const PropertyPage = () => {
   const [searchValue, setSearchValue] = useState('');

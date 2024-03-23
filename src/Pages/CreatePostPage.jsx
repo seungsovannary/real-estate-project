@@ -1,12 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import MainLayout from '../Layouts/MainLayout';
 import cn from '../utils/cn';
 import { Trash2 } from 'lucide-react';
 
 import { v4 } from 'uuid';
-import { db, storage } from '../config/firebaseconfig';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { addDoc, collection } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
 
 const CreatePostPage = () => {
   const [inputTitle, setInputTitle] = useState('');
@@ -30,7 +28,11 @@ const CreatePostPage = () => {
   const [othersFileImage, setOthersFileImage] = useState([]);
   const [errorOthersImage, setErrorOthersImage] = useState(false);
 
+  const [categories, setCategories] = useState([]);
+
   const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleSubmitPost = async (e) => {
     e.preventDefault();
@@ -42,12 +44,12 @@ const CreatePostPage = () => {
       setErrorDisplayImage(false);
     }
 
-    if (othersImage.length <= 0) {
-      setErrorOthersImage(true);
-      return;
-    } else {
-      setErrorOthersImage(false);
-    }
+    // if (othersImage.length <= 0) {
+    //   setErrorOthersImage(true);
+    //   return;
+    // } else {
+    //   setErrorOthersImage(false);
+    // }
 
     if (!inputCategory) {
       setErrorCategory(true);
@@ -65,71 +67,63 @@ const CreatePostPage = () => {
 
     setLoading(true);
 
-    const fileName = `user-uploaded/${v4()}`;
-    const imgs = ref(storage, fileName);
-    const uploadDisplay = await uploadBytes(imgs, displayFileImage);
-    const displayDownloadURL = await getDownloadURL(uploadDisplay.ref);
-
-    let othersImageObj = [];
-    await Promise.all(
-      othersFileImage.map(async (img) => {
-        const fileName = `user-uploaded/${v4()}`;
-        const imgs = ref(storage, fileName);
-        const data = await uploadBytes(imgs, img);
-        const val = await getDownloadURL(data.ref);
-        othersImageObj.push(val);
-      })
-    );
-
     const inputData = {
-      itemName: inputTitle,
-      itemDescription: inputDescription,
+      name: inputTitle,
+      description: inputDescription,
       type: inputType,
       price: inputPrice,
-      displayImage: displayDownloadURL,
-      allImages: othersImageObj,
-      details: {
-        location: [inputDistrict, inputCity],
-        size: inputSize,
-        bed: inputBed,
-        bath: inputBath,
-      },
-      category: inputCategory,
-      contactPerson: {
-        profileImg: 'https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg',
-        name: 'Seung Sovannary',
-        phoneNumber: '0232398324',
-      },
-      customerReviews: [],
-      createdAt: new Date(Date.now()).toISOString(),
+      image: displayImage,
+      // allImages: othersImageObj,
+      // details: {
+      //   location: [inputDistrict, inputCity],
+      //   size: inputSize,
+      //   bed: inputBed,
+      //   bath: inputBath,
+      // },
+      category_id: inputCategory,
+      // contactPerson: {
+      //   profileImg: 'https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg',
+      //   name: 'Seung Sovannary',
+      //   phoneNumber: '0232398324',
+      // },
+      // customerReviews: [],
+      // createdAt: new Date(Date.now()).toISOString(),
     };
 
-    console.log(inputData);
-
-    await addDoc(collection(db, 'posts'), inputData).then(() => {
-      setInputTitle('');
-      setInputDescription('');
-      setInputCategory('');
-      setInputType('');
-      setInputDistrict('');
-      setInputCity('');
-      setInputSize(0);
-      setInputBed(0);
-      setInputBath(0);
-      setInputPrice(0);
-      setDisplayFileImage('');
-      setDisplayImage('');
-      setOthersFileImage('');
-      setOthersImage('');
-    });
-    setLoading(false);
+    fetch('http://localhost:8000/api/properties',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        },
+        body: JSON.stringify(inputData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        navigate('/');
+      })
+      .catch(error => {
+        // Handle any errors
+        console.error('Error:', error);
+      }).finally(() => {
+        setLoading(false);
+      })
   };
 
-  const handleUploadDisplayImg = (e) => {
+  const getBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+  });
+
+  const handleUploadDisplayImg = async (e) => {
     e.preventDefault();
 
     const inputData = e.target.files[0];
-    const Url = URL.createObjectURL(inputData);
+
+    const Url = await getBase64(inputData);
 
     setDisplayImage(Url);
     setDisplayFileImage(inputData);
@@ -160,6 +154,29 @@ const CreatePostPage = () => {
     data.splice(index, 1);
     setOthersFileImage(data);
   };
+
+  const getCategories = () => {
+    return fetch('http://localhost:8000/api/categories',
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+        },
+      })
+      .then(response => response.json())
+      .then(data => {
+        setCategories(data);
+      })
+      .catch(error => {
+        // Handle any errors
+        console.error('Error:', error);
+      });
+  }
+
+  useEffect(() => {
+    getCategories();
+  }, []);
 
   return (
     <MainLayout>
@@ -224,7 +241,7 @@ const CreatePostPage = () => {
               </div>
             )}
           </div>
-          <div className='space-y-2 flex flex-col justify-start items-start w-full max-w-lg'>
+          {/* <div className='space-y-2 flex flex-col justify-start items-start w-full max-w-lg'>
             <label htmlFor='category' className={cn('text-lg font-semibold', errorOthersImage ? 'text-red-500' : '')}>
               Other Pictures
             </label>
@@ -259,7 +276,7 @@ const CreatePostPage = () => {
                     </div>
                   );
                 })}
-          </div>
+          </div> */}
 
           <label className='form-control w-full max-w-lg'>
             <div className='label'>
@@ -273,12 +290,9 @@ const CreatePostPage = () => {
               <option disabled value={'default'}>
                 Please select category
               </option>
-              <option value={'small-house'}>Small house</option>
-              <option value={'big-house'}>Big house</option>
-              <option value={'hotel'}>Hotel</option>
-              <option value={'condo'}>Condo</option>
-              <option value={'apartment'}>Apartment</option>
-              <option value={'land'}>Land</option>
+              {categories.map((item) => {
+                return <option value={item.id}>{item.name}</option>
+              })}
             </select>
             {errorCategoty && <p className='text-sm font-medium text-red-500'>Please select any cateogry.</p>}
           </label>
@@ -294,14 +308,14 @@ const CreatePostPage = () => {
               <option disabled value={'default'}>
                 Please select type
               </option>
-              <option value='sale'>For sale</option>
+              <option value='sell'>For sale</option>
               <option value='rent'>For rent</option>
               <option value='booking'>For booking</option>
             </select>
             {errorType && <p className='text-sm font-medium text-red-500'>Please select any type.</p>}
           </label>
 
-          <label className='form-control w-full max-w-lg'>
+          {/* <label className='form-control w-full max-w-lg'>
             <div className='label'>
               <span className='label-text text-xl'>District</span>
             </div>
@@ -365,7 +379,8 @@ const CreatePostPage = () => {
               className='input input-bordered w-full max-w-lg'
               required
             />
-          </label>
+          </label> */}
+
           <label className='form-control w-full max-w-lg'>
             <div className='label'>
               <span className='label-text text-xl'>Property Price</span>

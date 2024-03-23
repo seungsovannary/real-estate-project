@@ -1,35 +1,35 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { logOut } from '../redux/slices/authSlice';
-import { signOut } from 'firebase/auth';
-import { auth } from '../config/firebaseconfig';
+import { logIn } from '../redux/slices/authSlice';
 
 function Nav() {
   const user = useSelector((state) => state.auth.value);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const isLoggedIn = user.isLoggedIn;
-
-  useEffect(() => {
-    // if (user?.userRole === 'admin') {
-    //   navigate('/sign-in');
-    // }
-  })
+  const isLoggedIn = user.id;
 
   const handleLogOut = async (e) => {
     e.preventDefault();
 
-    signOut(auth)
-      .then(() => {
-        dispatch(logOut());
-        navigate('/sign-in');
+    fetch("http://localhost:8000/api/logout", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      },
+    }).then(response => response.json())
+      .then(data => {
+        dispatch(logIn({
+          email: '', id: '', role_id: ''
+        }))
+
+        localStorage.removeItem("access_token");
+        navigate('/');
       })
-      .catch((err) => {
-        if (err) {
-          console.log(err);
-        }
+      .catch(error => {
+        console.error('Error:', error);
       });
   };
 
@@ -83,16 +83,27 @@ function Nav() {
           </div>
         )}
 
-        <div className=' flex gap-4'>
-          <div className='hidden md:block'>
-            <Link to={'/sign-up'} className='btn btn-primary'>
-              Create an account
+        {!isLoggedIn ? (
+          <div className=' flex gap-4'>
+            <div className='hidden md:block'>
+              <Link to={'/sign-up'} className='btn btn-primary'>
+                Create an account
+              </Link>
+            </div>
+            <Link to={'/sign-in'} className='btn btn-outline'>
+              Sign In
             </Link>
           </div>
-          <Link to={'/sign-in'} className='btn btn-outline'>
-            Sign In
-          </Link>
-        </div>
+        ) : (
+          <div className=' flex gap-4'>
+            <div className='hidden md:block'>
+              <button onClick={handleLogOut} className='btn btn-primary'>
+                Logout
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

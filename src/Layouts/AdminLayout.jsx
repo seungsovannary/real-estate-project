@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Nav from '../components/Nav';
 import Sidebar from '../components/Sidebar';
 import { useDispatch } from 'react-redux';
-import { logIn } from '../redux/slices/authSlice';
+import { logIn, logOut } from '../redux/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -27,8 +27,8 @@ function AdminLayout({ children }) {
       .then(response => response.json())
       .then(async data => {
         // Do something with the response data
-        dispatch(logIn({ email: data.email, id: data.id, role: "admin" }));
-        checkRole("admin");
+        dispatch(logIn({ email: data.email, id: data.id, role_id: data.role_id }));
+        checkRole(data.role_id);
         SetLoading(true);
       })
       .catch(error => {
@@ -37,8 +37,8 @@ function AdminLayout({ children }) {
       });
   }
 
-  const checkRole = (role) => {
-    if (role !== "admin") {
+  const checkRole = (role_id) => {
+    if (role_id == 3) {
       navigate("/")
     }
   }
@@ -47,7 +47,7 @@ function AdminLayout({ children }) {
     getMe();
   }, []);
 
-  if (!loading && !user.isLoggedIn) {
+  if (!loading && !user.id) {
     return <div>Loading...</div>;
   }
 

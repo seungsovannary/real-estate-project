@@ -5,21 +5,16 @@ import ItemCard from '../components/ItemCard';
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import mockData from '../data/mock-data.json';
-import { db } from '../config/firebaseconfig';
-import { collection, onSnapshot } from 'firebase/firestore';
+
 function Homepage() {
   const user = useSelector((state) => state.auth.value);
   const [data, setData] = useState([]);
 
-  const dbCollectionRef = collection(db, 'posts');
-  // console.log(user);
-
   const getList = async () => {
-    return fetch('http://localhost:8000/api/users')
+    return fetch('http://localhost:8000/api/properties')
       .then(response => response.json())
       .then(data => {
-        console.log(data);
+        setData(data);
       })
       .catch(error => {
         // Handle any errors
@@ -28,14 +23,7 @@ function Homepage() {
   }
 
   useEffect(() => {
-    onSnapshot(dbCollectionRef, (snapshot) => {
-      let posts = [];
-      snapshot.docs.forEach((doc) => {
-        posts.push({ ...doc.data(), id: doc.id });
-      });
-
-      setData(posts);
-    });
+    getList();
 
   }, []);
 
@@ -51,7 +39,7 @@ function Homepage() {
               feels like home
             </p>
             <div className='grid sm:flex gap-10 mt-10'>
-              {user.isLoggedIn ? (
+              {user.id ? (
                 <Link to='/profile' className='btn btn-primary'>
                   My Profile
                 </Link>

@@ -4,10 +4,8 @@ import { BedSingle, MapPin, PhoneCall, Star, StarHalf } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import MainLayout from '../Layouts/MainLayout';
 
-import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { useSelector } from 'react-redux';
 import { db } from '../config/firebaseconfig';
-import data from '../data/mock-data.json';
 import cn from '../utils/cn';
 
 const ItemDetailPage = () => {
@@ -20,12 +18,21 @@ const ItemDetailPage = () => {
   const [starTemp, setStarTemp] = useState(0);
   const [reviewErrorMessage, setReviewErrorMessage] = useState('');
 
+  const getDetail = async () => {
+    return fetch('http://localhost:8000/api/properties/' + itemId.id)
+      .then(response => response.json())
+      .then(data => {
+        setData(data);
+      })
+      .catch(error => {
+        // Handle any errors
+        console.error('Error:', error);
+      });
+  }
+
   useEffect(() => {
-    onSnapshot(doc(db, 'posts', itemId.id), (doc) => {
-      setData({ ...doc.data(), id: doc.id });
-      // console.log({ ...doc.data(), id: doc.id });
-    });
-  }, [itemId]);
+    getDetail();
+  }, []);
 
   const handleStarClick = (value) => {
     setRating(value);
@@ -61,11 +68,6 @@ const ItemDetailPage = () => {
     const newData = { ...data };
 
     newData.customerReviews.push(inputData);
-
-    setDoc(doc(db, 'posts', data.id), newData).then(() => {
-      setInputReview('');
-      setRating(0);
-    });
   };
 
   const handleChangeReview = (review) => {
@@ -83,8 +85,6 @@ const ItemDetailPage = () => {
     }
 
     newData.customerReviews[index] = inputNewReview;
-
-    setDoc(doc(db, 'posts', data.id), newData);
   };
 
   return (
@@ -107,15 +107,15 @@ const ItemDetailPage = () => {
         {/* IMAGES */}
         <div className='grid grid-cols-12 h-[500px] gap-5 mt-5'>
           <div className='col-span-6 h-full overflow-hidden'>
-            <img src={data?.displayImage} alt='ji' className='h-full w-full object-cover rounded-xl' />
+            <img src={data?.image} alt='ji' className='h-full w-full object-cover rounded-xl' />
           </div>
 
           <div className='col-span-3'>
-            <img src={data?.allImages[0]} alt='ji' className='h-full w-full object-cover rounded-xl' />{' '}
+            {/* <img src={data?.allImages[0]} alt='ji' className='h-full w-full object-cover rounded-xl' />{' '} */}
           </div>
 
           <div className='col-span-3 flex flex-col gap-5'>
-            <div className='h-full relative rounded-xl overflow-hidden'>
+            {/* <div className='h-full relative rounded-xl overflow-hidden'>
               <img src={data?.allImages[1]} alt='jbjfvncdbgdhgbdi' className='h-full w-full object-cover rounded-xl' />
               <img src='' alt='ji' className='h-full w-full object-cover rounded-xl' />
             </div>
@@ -127,7 +127,7 @@ const ItemDetailPage = () => {
               <div className=' absolute inset-0 bg-black bg-opacity-70 flex justify-center items-center'>
                 <p className='text-xl text-white'>View More</p>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -183,17 +183,17 @@ const ItemDetailPage = () => {
             <div className='mt-5 flex items-center gap-5'>
               <div className='avatar'>
                 <div className='w-20 rounded-full'>
-                  <img src={data?.contactPerson.profileImg} alt='test' />
+                  <img src={data?.contactPerson?.profileImg} alt='test' />
                 </div>
               </div>
 
               <div className='space-y-2'>
-                <h3 className='text-xl font-semibold'>{data?.contactPerson.name}</h3>
+                <h3 className='text-xl font-semibold'>{data?.contactPerson?.name}</h3>
                 <p className='flex gap-3'>
                   <span>
                     <PhoneCall className='w-5' />
                   </span>
-                  <span>{data?.contactPerson.phoneNumber}</span>
+                  <span>{data?.contactPerson?.phoneNumber}</span>
                 </p>
               </div>
             </div>
@@ -240,11 +240,11 @@ const ItemDetailPage = () => {
             <div className='grid grid-cols-3 mt-5 gap-y-3'>
               <div className='flex gap-2'>
                 <p className=' font-semibold'>Bathroom:</p>
-                <p className='text-gray-500'>{data?.details.bath}</p>
+                <p className='text-gray-500'>{data?.details?.bath}</p>
               </div>
               <div className='flex gap-2'>
                 <p className=' font-semibold'>Room :</p>
-                <p className='text-gray-500'>{data?.details.bed}</p>
+                <p className='text-gray-500'>{data?.details?.bed}</p>
               </div>
               <div className='flex gap-2'>
                 <p className=' font-semibold'>Structure Type:</p>
@@ -256,11 +256,11 @@ const ItemDetailPage = () => {
               </div>
               <div className='flex gap-2'>
                 <p className=' font-semibold'>Property Type:</p>
-                <p className='text-gray-500'>{data?.category}</p>
+                <p className='text-gray-500'>{data?.category.name}</p>
               </div>
               <div className='flex gap-2'>
                 <p className=' font-semibold'>property status:</p>
-                <p className='text-gray-500'>For {data?.type}</p>
+                <p className='text-gray-500'>For {data?.status}</p>
               </div>
             </div>
           </div>
@@ -273,7 +273,7 @@ const ItemDetailPage = () => {
             <h3 className='text-xl font-semibold'>Customer Reviews</h3>
 
             <div className='mt-5'>
-              {data?.customerReviews.map((review, index) => {
+              {/* {data?.customerReviews.map((review, index) => {
                 if (user.userRole !== 'admin' && review.isPending) {
                   return null;
                 }
@@ -305,7 +305,7 @@ const ItemDetailPage = () => {
                     )}
                   </div>
                 );
-              })}
+              })} */}
             </div>
           </div>
 
