@@ -1,15 +1,61 @@
 import AdminLayout from '../../Layouts/AdminLayout';
-import ItemCard from '../../components/ItemCard';
+import ItemCard from '../../components/seller/ItemCard';
 import { useEffect, useState } from 'react';
 
 const PropertyPage = () => {
   const [searchValue, setSearchValue] = useState('');
 
   const [data, setData] = useState([]);
-  const [backUp, setBackUpData] = useState([]);
+  const [categories, setCategories] = useState([]);
 
-  const getList = async () => {
-    return fetch('http://localhost:8000/api/properties')
+  const getCategories = async () => {
+    const baseUrl = 'http://localhost:8000/api/categories';
+
+    return fetch(baseUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        setCategories(data);
+      })
+      .catch(error => {
+        // Handle any errors
+        console.error('Error:', error);
+      });
+  }
+
+  const getList = async (data = {}) => {
+    const queryParams = {
+    };
+
+    if (data?.category_id) {
+      queryParams.category_id = data.category_id
+    }
+
+    if (data?.type) {
+      queryParams.type = data.type
+    }
+
+    if (data?.name) {
+      queryParams.name = data.name
+    }
+
+    const baseUrl = 'http://localhost:8000/api/properties';
+    const queryString = new URLSearchParams(queryParams).toString();
+    const apiUrl = `${baseUrl}?${queryString}`;
+
+    return fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      },
+      
+    })
       .then(response => response.json())
       .then(data => {
         setData(data);
@@ -20,47 +66,56 @@ const PropertyPage = () => {
       });
   }
 
+  const handleDelete = (e, item) => {
+    e.preventDefault();
+
+    const baseUrl = 'http://localhost:8000/api/properties';
+    const apiUrl = `${baseUrl}/${item.id}`;
+
+    return fetch(apiUrl, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          getList();
+        }
+      })
+      .catch(error => {
+        // Handle any errors
+        console.error('Error:', error);
+      });
+  };
+
   useEffect(() => {
+    getCategories();
     getList();
   }, []);
 
   const handleChangeType = (e) => {
-    const inputType = e.target.value;
-
-    if (inputType === 'none') {
-      setData(backUp);
-    } else {
-      setData(backUp.filter((eachData) => eachData.type === inputType));
-    }
-  };
-
-  const handleChangeMinPrice = (e) => {
-    const inputMinPrice = e.target.value;
-    console.log(inputMinPrice);
-
-    setData(backUp.filter((eachData) => eachData.price >= inputMinPrice));
+    getList({
+      type: e.target.value
+    })
   };
 
   const handleSearch = (e) => {
     setSearchValue(e.target.value);
 
-    setData(backUp.filter((item) => String(item.itemName).toLowerCase().includes(String(e.target.value).toLowerCase())));
-  };
-  const handleChangeMaxPrice = (e) => {
-    const inputMaxPrice = e.target.value;
-    console.log(inputMaxPrice);
-
-    setData(backUp.filter((eachData) => eachData.price <= inputMaxPrice));
+    getList({
+      name: e.target.value
+    })
   };
 
   const handleChangeCategory = (e) => {
     const inputType = e.target.value;
 
-    if (inputType === 'none') {
-      setData(backUp);
-    } else {
-      setData(backUp.filter((eachData) => eachData.category === inputType));
-    }
+    getList({
+      category_id: inputType
+    });
   };
 
   return (
@@ -82,42 +137,12 @@ const PropertyPage = () => {
             <option value='type' disabled>
               Type
             </option>
-            <option value='none'>None</option>
+            <option value=''>All</option>
             <option value='rent'>Rent</option>
             <option value='sale'>Sale</option>
             <option value='booking'>Booking</option>
           </select>
-          <select
-            className='select select-bordered w-full max-w-xs'
-            defaultValue={'min'}
-            onChange={(e) => handleChangeMinPrice(e)}
-          >
-            <option disabled value={'min'}>
-              Min price
-            </option>
-            <option value={1000}>$1000</option>
-            <option value={2500}>$2500</option>
-            <option value={3000}>$3000</option>
-            <option value={3500}>$3500</option>
-            <option value={3800}>$3800</option>
-            <option value={4000}>$4000</option>
-            <option value={10000}>$10000</option>
-          </select>
-          <select
-            className='select select-bordered w-full max-w-xs'
-            defaultValue={'max'}
-            onChange={(e) => handleChangeMaxPrice(e)}
-          >
-            <option disabled value={'max'}>
-              Max price
-            </option>
-            <option value={5000}>$5000</option>
-            <option value={8000}>$8000</option>
-            <option value={9000}>$9000</option>
-            <option value={10000}>$10000</option>
-            <option value={20000}>$20000</option>
-            <option value={30000}>$30000</option>
-          </select>
+
           <select
             className='select select-bordered w-full max-w-xs'
             defaultValue={'category'}
@@ -126,13 +151,10 @@ const PropertyPage = () => {
             <option value={'category'} disabled>
               Category
             </option>
-            <option value={'none'}>None</option>
-            <option value={'small-house'}>Small house</option>
-            <option value={'big-house'}>Big house</option>
-            <option value={'hotel'}>Hotel</option>
-            <option value={'condo'}>Condo</option>
-            <option value={'apartment'}>Apartment</option>
-            <option value={'land'}>Land</option>
+            <option value={''}>All</option>
+            {categories.map((item) => {
+              return <option value={item.id}>{item.name}</option>
+            })}
           </select>
         </div>
       </section>
@@ -143,7 +165,7 @@ const PropertyPage = () => {
         </div>
         <div className='mt-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 lg:gap-7'>
           {data.map((item) => {
-            return <ItemCard key={item.id} item={item} />;
+            return <ItemCard key={item.id} item={item} handleDelete={handleDelete} />;
           })}
         </div>
       </section>

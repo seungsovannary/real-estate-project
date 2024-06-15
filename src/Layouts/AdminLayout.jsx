@@ -38,7 +38,7 @@ function AdminLayout({ children }) {
   }
 
   const checkRole = (role_id) => {
-    if (role_id == 3) {
+    if (role_id == 2) {
       navigate("/")
     }
   }

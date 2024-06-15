@@ -1,31 +1,23 @@
 import { useEffect, useState } from 'react';
-import Footer from '../components/Footer';
 import Nav from '../components/Nav';
-import { supabase } from '..';
+import Sidebar from '../components/Sidebar';
 import { useDispatch } from 'react-redux';
 import { logIn, logOut } from '../redux/slices/authSlice';
-import { current } from '@reduxjs/toolkit';
+import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-function MainLayout({ children }) {
+
+function SellerLayout({ children }) {
   const dispatch = useDispatch();
-  const [loading, SetLoading] = useState(false);
+  const navigate = useNavigate();
   const user = useSelector((state) => state.auth.value);
 
-  const getMe = async () => {
-    if (user.id) {
-      SetLoading(false);
-      return;
-    }
+  const [loading, SetLoading] = useState(false);
 
+  const getMe = async () => {
     const url = 'http://localhost:8000/api/me';
     const accessToken = localStorage.getItem("access_token");
 
-    if (!accessToken) {
-      dispatch(logOut());
-      return;
-    }
-
-    fetch(url, {
+    await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -36,32 +28,40 @@ function MainLayout({ children }) {
       .then(async data => {
         // Do something with the response data
         dispatch(logIn({ email: data.email, id: data.id, role_id: data.role_id }));
+        checkRole(data.role_id);
         SetLoading(true);
-      }).catch((e) => {
-        console.log(e)
-        dispatch(logOut());
-      }).finally(() => {
-        SetLoading(true);
+      })
+      .catch(error => {
+        // Handle any errors
+        navigate('/sign-in');
       });
+  }
+
+  const checkRole = (role_id) => {
+    if (role_id == 2) {
+      navigate("/")
+    }
   }
 
   useEffect(() => {
     getMe();
   }, []);
 
-  // if (loading && !user.id) {
-  //   return <div>Loading...</div>;
-  // }
+  if (!loading && !user.id) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div>
       <Nav />
-      <div className='mt-[68px]'>
-        {children}
+      <Sidebar />
+      <div className="p-4 sm:ml-64 mt-[68px]">
+        <div className="p-4">
+          {children}
+        </div>
       </div>
-      <Footer />
     </div>
   );
 }
 
-export default MainLayout;
+export default SellerLayout;

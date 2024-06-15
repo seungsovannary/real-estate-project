@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import AdminLayout from '../../Layouts/AdminLayout';
+import { Link } from 'react-router-dom';
 
 function UsersPage() {
   const [users, setUsers] = useState([]);
@@ -61,7 +62,7 @@ function UsersPage() {
           </thead>
           <tbody>
             {users.map((user, index) => (
-              <tr class="bg-white border-b  hover:bg-gray-50 ">
+              user?.role?.slug !== "admin" && <tr class="bg-white border-b  hover:bg-gray-50 ">
                 <th scope="row" class="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap ">
                   { user.profile ? <img class="w-10 h-10 rounded-full" src={ user.profile } alt="avatar" />
                   : <img class="w-10 h-10 rounded-full" src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" alt="avatar" /> }
@@ -75,11 +76,16 @@ function UsersPage() {
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex items-center">
-                    <div class="h-2.5 w-2.5 rounded-full bg-green-500 me-2"></div> Active
+                    { user?.status === "approved" && <div class="h-2.5 w-2.5 rounded-full bg-green-500 me-2"></div> }
+                    { user?.status === "unapproved" && <div class="h-2.5 w-2.5 rounded-full bg-yellow-500 me-2"></div> }
+                    { user?.status === "banned" && <div class="h-2.5 w-2.5 rounded-full bg-red-500 me-2"></div> }
+                     {String(user?.status).toUpperCase()}
                   </div>
                 </td>
                 <td class="px-6 py-4">
-                  <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit user</a>
+                  <Link to={'/admin/users/' + user?.id + '/edit'} className='font-medium text-blue-600 dark:text-blue-500 hover:underline'>
+                    Edit user
+                  </Link>
                 </td>
               </tr>
             ))}

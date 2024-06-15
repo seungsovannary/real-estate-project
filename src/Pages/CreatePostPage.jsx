@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import MainLayout from '../Layouts/MainLayout';
 import cn from '../utils/cn';
 import { Trash2 } from 'lucide-react';
 
 import { v4 } from 'uuid';
 import { useNavigate } from 'react-router-dom';
+import SellerLayout from '../Layouts/SellerLayout';
 
 const CreatePostPage = () => {
+  const accessToken = localStorage.getItem('access_token');
+
   const [inputTitle, setInputTitle] = useState('');
   const [inputDescription, setInputDescription] = useState('');
   const [inputCategory, setInputCategory] = useState('');
@@ -95,13 +97,15 @@ const CreatePostPage = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          'Authorization': `Bearer ${accessToken}`
         },
         body: JSON.stringify(inputData)
       })
       .then(response => response.json())
       .then(data => {
-        navigate('/');
+        if (data?.success) {
+          navigate('/');
+        }
       })
       .catch(error => {
         // Handle any errors
@@ -179,7 +183,7 @@ const CreatePostPage = () => {
   }, []);
 
   return (
-    <MainLayout>
+    <SellerLayout>
       <div className='max-w-screen-2xl mx-auto min-h-[80vh] px-2 flex flex-col justify-center items-center py-10'>
         <h1 className='text-4xl font-semibold'>Create Post</h1>
 
@@ -308,7 +312,7 @@ const CreatePostPage = () => {
               <option disabled value={'default'}>
                 Please select type
               </option>
-              <option value='sell'>For sale</option>
+              <option value='sale'>For sale</option>
               <option value='rent'>For rent</option>
               <option value='booking'>For booking</option>
             </select>
@@ -399,7 +403,7 @@ const CreatePostPage = () => {
           </button>
         </form>
       </div>
-    </MainLayout>
+    </SellerLayout>
   );
 };
 

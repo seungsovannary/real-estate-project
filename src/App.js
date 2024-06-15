@@ -10,6 +10,7 @@ import AboutUsPage from './Pages/AboutUsPage';
 
 import AdminDashboardPage from './Pages/Admin/DashboardPage';
 import AdminUsersPage from './Pages/Admin/UsersPage';
+import AdminUserEditPage from './Pages/Admin/Users/EditPage';
 import AdminPropertyPage from './Pages/Admin/PropertyPage';
 
 import SellerPropertyPage from './Pages/Seller/PropertyPage';
@@ -29,6 +30,7 @@ const router = createBrowserRouter(
         <Route index element={<AdminDashboardPage />} />
         <Route path='dashboard' element={<AdminDashboardPage />} />
         <Route path='users' element={<AdminUsersPage />} />
+        <Route path='users/:id/edit' element={<AdminUserEditPage />} />
         <Route path='properties' element={<AdminPropertyPage />} />
       </Route>
 

@@ -1,42 +1,53 @@
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import MainLayout from '../Layouts/MainLayout';
-import { logIn } from '../redux/slices/authSlice';
 import { useState } from 'react';
-
+import MainLayout from '../Layouts/MainLayout';
+import { useNavigate } from 'react-router-dom';
 
 const SignInPage = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [inputEmail, setInputEmail] = useState('');
   const [inputPassword, setInputPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [inputEmail, setInputEmail] = useState('');
+  const [inputErrorMessage, setInputErrorMessage] = useState('');
 
-  const handleLogIn = async (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
 
-    const logInRequest = {
+    const InputSignIn = {
       email: inputEmail,
       password: inputPassword,
     };
 
-    return fetch("http://localhost:8000/api/login", {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(logInRequest)
-    }).then(response => response.json())
+    fetch('http://localhost:8000/api/login',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(InputSignIn)
+      })
+      .then(response => response.json())
       .then(data => {
-        if (data.access_token) {
-          localStorage.setItem("access_token", data.access_token);
-          navigate('/admin');
+        console.log(data);
+        if(data.success){
+            if (data?.access_token) {
+              localStorage.setItem('access_token', data.access_token)
+            }
+
+            if (data?.user?.role?.slug === 'admin' || data?.user?.role?.slug === 'seller') {
+              navigate('/admin');
+            } else {
+              navigate('/')
+            }
+
+        } else {
+          setInputErrorMessage(data?.message);
         }
       })
       .catch(error => {
+        // Handle any errors
         console.error('Error:', error);
-      });
+      }).finally(() => {
+      })
   };
 
   return (
@@ -44,7 +55,8 @@ const SignInPage = () => {
       <div className='max-w-screen-2xl mx-auto min-h-[80vh] px-2 flex flex-col justify-center items-center py-10'>
         <h1 className='text-4xl font-semibold'>Sign In</h1>
 
-        <form className='w-full flex flex-col items-center mt-10 gap-5' onSubmit={(e) => handleLogIn(e)}>
+        <form className='w-full flex flex-col items-center mt-10 gap-5' onSubmit={(e) => handleSignIn(e)}>
+
           <label className='form-control w-full max-w-lg'>
             <div className='label'>
               <span className='label-text text-xl'>Email</span>
@@ -57,6 +69,7 @@ const SignInPage = () => {
               className='input input-bordered w-full max-w-lg'
             />
           </label>
+
           <label className='form-control w-full max-w-lg'>
             <div className='label'>
               <span className='label-text text-xl'>Password</span>
@@ -64,14 +77,14 @@ const SignInPage = () => {
             <input
               type='password'
               autoComplete='false'
-              placeholder='Enter your password'
               value={inputPassword}
               onChange={(e) => setInputPassword(e.target.value)}
+              placeholder='Enter your password'
               className='input input-bordered w-full max-w-lg'
             />
           </label>
 
-          {errorMessage && <p className=' text-red-500'>Error: {errorMessage}</p>}
+          { inputErrorMessage && <span className='text-red-500'>{inputErrorMessage}</span>}
 
           <button type='submit' className='btn btn-primary mt-5'>
             Sign In

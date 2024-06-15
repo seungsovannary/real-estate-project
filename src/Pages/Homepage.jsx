@@ -24,7 +24,6 @@ function Homepage() {
 
   useEffect(() => {
     getList();
-
   }, []);
 
   return (
@@ -40,7 +39,7 @@ function Homepage() {
             </p>
             <div className='grid sm:flex gap-10 mt-10'>
               {user.id ? (
-                <Link to='/profile' className='btn btn-primary'>
+                <Link to='/admin' className='btn btn-primary'>
                   My Profile
                 </Link>
               ) : (
@@ -65,7 +64,7 @@ function Homepage() {
               </Link>
             </div>
             <div className='mt-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 lg:gap-7'>
-              {data.slice(0, 5).map((item) => {
+              {data?.slice(0, 5).map((item) => {
                 return <ItemCard key={item.id} item={item} />;
               })}
             </div>
