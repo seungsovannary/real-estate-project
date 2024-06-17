@@ -8,7 +8,7 @@ import SellerLayout from '../Layouts/SellerLayout';
 
 const CreatePostPage = () => {
   const accessToken = localStorage.getItem('access_token');
-
+console.log(accessToken);
   const [inputTitle, setInputTitle] = useState('');
   const [inputDescription, setInputDescription] = useState('');
   const [inputCategory, setInputCategory] = useState('');
@@ -160,7 +160,7 @@ const CreatePostPage = () => {
   };
 
   const getCategories = () => {
-    return fetch('http://localhost:8000/api/categories',
+    return fetch(process.env.REACT_APP_API_URL + '/categories',
       {
         method: 'GET',
         headers: {

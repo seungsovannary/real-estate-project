@@ -9,7 +9,7 @@ function UsersPage() {
   const [searchValue, setSearchValue] = useState('');
 
   const getList = async () => {
-    return fetch('http://localhost:8000/api/users')
+    return fetch(process.env.REACT_APP_API_URL + '/users')
       .then(response => response.json())
       .then(data => {
         setUsers(data);

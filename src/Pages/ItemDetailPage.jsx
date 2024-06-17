@@ -19,7 +19,7 @@ const ItemDetailPage = () => {
   const [reviewErrorMessage, setReviewErrorMessage] = useState('');
 
   const getDetail = async () => {
-    return fetch('http://localhost:8000/api/properties/' + itemId.id)
+    return fetch(process.env.REACT_APP_API_URL + '/properties/' + itemId.id)
       .then(response => response.json())
       .then(data => {
         setData(data);

@@ -22,7 +22,7 @@ function EditPage() {
   const updateUser = async (e) => {
     e.preventDefault();
 
-    fetch('http://localhost:8000/api/users/' + id,
+    fetch(process.env.REACT_APP_API_URL + '/users/' + id,
       {
         method: 'PUT',
         headers: {
@@ -43,7 +43,7 @@ function EditPage() {
   }
 
   const getUser = async (e) => {
-    fetch('http://localhost:8000/api/users/' + id,
+    fetch(process.env.REACT_APP_API_URL + '/users/' + id,
       {
         method: 'GET',
         headers: {

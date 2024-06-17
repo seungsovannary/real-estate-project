@@ -14,7 +14,7 @@ function AdminLayout({ children }) {
   const [loading, SetLoading] = useState(false);
 
   const getMe = async () => {
-    const url = 'http://localhost:8000/api/me';
+    const url = process.env.REACT_APP_API_URL + '/me';
     const accessToken = localStorage.getItem("access_token");
 
     await fetch(url, {

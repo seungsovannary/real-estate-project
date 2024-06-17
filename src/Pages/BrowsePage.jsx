@@ -24,7 +24,7 @@ const BrowsePage = () => {
       queryParams.name = data.name
     }
 
-    const baseUrl = 'http://localhost:8000/api/properties';
+    const baseUrl = process.env.REACT_APP_API_URL + '/properties';
     const queryString = new URLSearchParams(queryParams).toString();
     const apiUrl = `${baseUrl}?${queryString}`;
 
@@ -40,7 +40,7 @@ const BrowsePage = () => {
   }
 
   const getCategories = async () => {
-    const baseUrl = 'http://localhost:8000/api/categories';
+    const baseUrl = process.env.REACT_APP_API_URL + '/categories';
 
     return fetch(baseUrl)
       .then(response => response.json())

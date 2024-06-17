@@ -11,7 +11,7 @@ function Homepage() {
   const [data, setData] = useState([]);
 
   const getList = async () => {
-    return fetch('http://localhost:8000/api/properties')
+    return fetch(process.env.REACT_APP_API_URL + '/properties')
       .then(response => response.json())
       .then(data => {
         setData(data);

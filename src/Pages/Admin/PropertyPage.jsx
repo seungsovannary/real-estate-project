@@ -9,7 +9,7 @@ const PropertyPage = () => {
   const [categories, setCategories] = useState([]);
 
   const getCategories = async () => {
-    const baseUrl = 'http://localhost:8000/api/categories';
+    const baseUrl = process.env.REACT_APP_API_URL + '/categories';
 
     return fetch(baseUrl, {
       method: 'GET',
@@ -44,7 +44,7 @@ const PropertyPage = () => {
       queryParams.name = data.name
     }
 
-    const baseUrl = 'http://localhost:8000/api/properties';
+    const baseUrl = process.env.REACT_APP_API_URL + '/properties';
     const queryString = new URLSearchParams(queryParams).toString();
     const apiUrl = `${baseUrl}?${queryString}`;
 

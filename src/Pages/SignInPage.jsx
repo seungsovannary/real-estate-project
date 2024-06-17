@@ -27,16 +27,20 @@ const SignInPage = () => {
       })
       .then(response => response.json())
       .then(data => {
-        console.log(data);
         if(data.success){
             if (data?.access_token) {
               localStorage.setItem('access_token', data.access_token)
             }
 
-            if (data?.user?.role?.slug === 'admin' || data?.user?.role?.slug === 'seller') {
+            if (data?.user?.role_id == 1 || data?.user?.role_id == 3) {
               navigate('/admin');
+              console.log("1");
+              console.log(data?.user?.role_id );
             } else {
-              navigate('/')
+              // navigate('/')
+              console.log("2");
+              console.log(data);
+
             }
 
         } else {
