@@ -1,4 +1,9 @@
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
+  RouterProvider,
+} from "react-router-dom";
 
 import Homepage from './Pages/Homepage';
 import BrowsePage from './Pages/BrowsePage';
@@ -12,13 +17,15 @@ import AdminUsersPage from './Pages/Admin/Users/ListPage';
 import AdminUserEditPage from './Pages/Admin/Users/EditPage';
 import AdminPropertyPage from './Pages/Admin/Properties/ListPage';
 import AdminPropertyCreatePage from './Pages/Admin/Properties/CreatePage';
+import AdminCategoryPage from './Pages/Admin/Categories/ListPage';
 
 import SellerPropertyPage from './Pages/Seller/Properties/ListPage';
 import SellerPropertyCreatePage from './Pages/Seller/Properties/CreatePage';
+import SellerCategoryPage from './Pages/Seller/Categories/ListPage';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path='/'>
+    <Route path="/">
       <Route index element={<Homepage />} />
       <Route path='browse' element={<BrowsePage />} />
       <Route path='sign-up' element={<SignUpPage />} />
@@ -26,21 +33,22 @@ const router = createBrowserRouter(
       <Route path='item/:id' element={<ItemDetailPage />} />
       <Route path='about-us' element={<AboutUsPage />} />
 
-      <Route path='admin'>
+      <Route path="admin">
         <Route index element={<AdminDashboardPage />} />
         <Route path='dashboard' element={<AdminDashboardPage />} />
         <Route path='users' element={<AdminUsersPage />} />
         <Route path='users/:id/edit' element={<AdminUserEditPage />} />
         <Route path='properties' element={<AdminPropertyPage />} />
         <Route path='properties/create' element={<AdminPropertyCreatePage />} />
-
+        <Route path='categories' element={<AdminCategoryPage />} />
       </Route>
 
-      <Route path='seller'>
+      <Route path="seller">
         <Route index element={<AdminDashboardPage />} />
         <Route path='dashboard' element={<AdminDashboardPage />} />
         <Route path='properties' element={<SellerPropertyPage />} />
         <Route path='properties/create' element={<SellerPropertyCreatePage />} />
+        <Route path='categories' element={<SellerCategoryPage />} />
       </Route>
     </Route>
   )
