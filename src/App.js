@@ -5,15 +5,16 @@ import BrowsePage from './Pages/BrowsePage';
 import SignUpPage from './Pages/SignUpPage';
 import SignInPage from './Pages/SignInPage';
 import ItemDetailPage from './Pages/ItemDetailPage';
-import CreatePostPage from './Pages/CreatePostPage';
 import AboutUsPage from './Pages/AboutUsPage';
 
 import AdminDashboardPage from './Pages/Admin/DashboardPage';
-import AdminUsersPage from './Pages/Admin/UsersPage';
+import AdminUsersPage from './Pages/Admin/Users/ListPage';
 import AdminUserEditPage from './Pages/Admin/Users/EditPage';
-import AdminPropertyPage from './Pages/Admin/PropertyPage';
+import AdminPropertyPage from './Pages/Admin/Properties/ListPage';
+import AdminPropertyCreatePage from './Pages/Admin/Properties/CreatePage';
 
-import SellerPropertyPage from './Pages/Seller/PropertyPage';
+import SellerPropertyPage from './Pages/Seller/Properties/ListPage';
+import SellerPropertyCreatePage from './Pages/Seller/Properties/CreatePage';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -22,7 +23,6 @@ const router = createBrowserRouter(
       <Route path='browse' element={<BrowsePage />} />
       <Route path='sign-up' element={<SignUpPage />} />
       <Route path='sign-in' element={<SignInPage />} />
-      <Route path='create-post' element={<CreatePostPage />} />
       <Route path='item/:id' element={<ItemDetailPage />} />
       <Route path='about-us' element={<AboutUsPage />} />
 
@@ -32,13 +32,15 @@ const router = createBrowserRouter(
         <Route path='users' element={<AdminUsersPage />} />
         <Route path='users/:id/edit' element={<AdminUserEditPage />} />
         <Route path='properties' element={<AdminPropertyPage />} />
+        <Route path='properties/create' element={<AdminPropertyCreatePage />} />
+
       </Route>
 
       <Route path='seller'>
         <Route index element={<AdminDashboardPage />} />
         <Route path='dashboard' element={<AdminDashboardPage />} />
         <Route path='properties' element={<SellerPropertyPage />} />
-        <Route path='create-post' element={<CreatePostPage />} />
+        <Route path='properties/create' element={<SellerPropertyCreatePage />} />
       </Route>
     </Route>
   )

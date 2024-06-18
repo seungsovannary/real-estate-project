@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import AdminLayout from '../../Layouts/AdminLayout';
+import AdminLayout from '../../../Layouts/AdminLayout';
 import { Link } from 'react-router-dom';
 
 function UsersPage() {

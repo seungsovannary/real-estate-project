@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import cn from '../utils/cn';
+import cn from '../../../utils/cn';
 import { Trash2 } from 'lucide-react';
 
-import { v4 } from 'uuid';
 import { useNavigate } from 'react-router-dom';
-import SellerLayout from '../Layouts/SellerLayout';
+import SellerLayout from '../../../Layouts/SellerLayout'
 
 const CreatePostPage = () => {
   const accessToken = localStorage.getItem('access_token');
@@ -92,7 +91,7 @@ console.log(accessToken);
       // createdAt: new Date(Date.now()).toISOString(),
     };
 
-    fetch('http://localhost:8000/api/properties',
+    fetch(process.env.REACT_APP_API_URL + '/properties',
       {
         method: 'POST',
         headers: {

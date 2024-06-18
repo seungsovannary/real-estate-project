@@ -1,5 +1,5 @@
-import AdminLayout from '../../Layouts/AdminLayout';
-import ItemCard from '../../components/seller/ItemCard';
+import AdminLayout from '../../../Layouts/AdminLayout';
+import ItemCard from '../../../components/ItemCard';
 import { useEffect, useState } from 'react';
 
 const PropertyPage = () => {
@@ -47,7 +47,7 @@ const PropertyPage = () => {
     const baseUrl = process.env.REACT_APP_API_URL + '/properties';
     const queryString = new URLSearchParams(queryParams).toString();
     const apiUrl = `${baseUrl}?${queryString}`;
-
+ 
     return fetch(apiUrl, {
       method: 'GET',
       headers: {
@@ -65,31 +65,6 @@ const PropertyPage = () => {
         console.error('Error:', error);
       });
   }
-
-  const handleDelete = (e, item) => {
-    e.preventDefault();
-
-    const baseUrl = 'http://localhost:8000/api/properties';
-    const apiUrl = `${baseUrl}/${item.id}`;
-
-    return fetch(apiUrl, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-      },
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          getList();
-        }
-      })
-      .catch(error => {
-        // Handle any errors
-        console.error('Error:', error);
-      });
-  };
 
   useEffect(() => {
     getCategories();
@@ -165,7 +140,7 @@ const PropertyPage = () => {
         </div>
         <div className='mt-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 lg:gap-7'>
           {data.map((item) => {
-            return <ItemCard key={item.id} item={item} handleDelete={handleDelete} />;
+            return <ItemCard key={item.id} item={item} />;
           })}
         </div>
       </section>

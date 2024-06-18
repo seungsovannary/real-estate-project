@@ -17,7 +17,7 @@ const SignInPage = () => {
       password: inputPassword,
     };
 
-    fetch('http://localhost:8000/api/login',
+    fetch(process.env.REACT_APP_API_URL + '/login',
       {
         method: 'POST',
         headers: {
