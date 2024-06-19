@@ -27,21 +27,21 @@ const SignInPage = () => {
       })
       .then(response => response.json())
       .then(data => {
-        if(data.success){
-            if (data?.access_token) {
-              localStorage.setItem('access_token', data.access_token)
-            }
+        if (data.success) {
+          if (data?.access_token) {
+            localStorage.setItem('access_token', data.access_token)
+          }
 
-            if (data?.user?.role_id == 1 || data?.user?.role_id == 2) {
-              navigate('/admin');
-              console.log("1");
-              console.log(data?.user?.role_id );
-            } else {
-              navigate('/')
-              console.log("2");
-              console.log(data);
+          if (data?.user?.role_id === "1") {
+            navigate('/admin');
+          } else if (data?.user?.role_id === "2") {
 
-            }
+            navigate('/seller');
+
+          } else {
+
+            navigate('/')
+          }
 
         } else {
           setInputErrorMessage(data?.message);
@@ -88,7 +88,7 @@ const SignInPage = () => {
             />
           </label>
 
-          { inputErrorMessage && <span className='text-red-500'>{inputErrorMessage}</span>}
+          {inputErrorMessage && <span className='text-red-500'>{inputErrorMessage}</span>}
 
           <button type='submit' className='btn btn-primary mt-5'>
             Sign In
