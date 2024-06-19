@@ -32,12 +32,12 @@ const SignInPage = () => {
               localStorage.setItem('access_token', data.access_token)
             }
 
-            if (data?.user?.role_id == 1 || data?.user?.role_id == 3) {
+            if (data?.user?.role_id == 1 || data?.user?.role_id == 2) {
               navigate('/admin');
               console.log("1");
               console.log(data?.user?.role_id );
             } else {
-              // navigate('/')
+              navigate('/')
               console.log("2");
               console.log(data);
 
