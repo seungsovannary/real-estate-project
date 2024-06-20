@@ -1,26 +1,26 @@
-import { useEffect, useState } from 'react';
-import cn from '../../../utils/cn';
-import { Trash2 } from 'lucide-react';
+import { useEffect, useState } from "react";
+import cn from "../../utils/cn";
+import { Trash2 } from "lucide-react";
 
-import { useNavigate } from 'react-router-dom';
-import SellerLayout from '../../../Layouts/SellerLayout'
+import { useNavigate } from "react-router-dom";
+import SellerLayout from "../../Layouts/SellerLayout";
 
 const CreatePostPage = () => {
-  const accessToken = localStorage.getItem('access_token');
-console.log(accessToken);
-  const [inputTitle, setInputTitle] = useState('');
-  const [inputDescription, setInputDescription] = useState('');
-  const [inputCategory, setInputCategory] = useState('');
-  const [inputType, setInputType] = useState('');
-  const [inputDistrict, setInputDistrict] = useState('');
-  const [inputCity, setInputCity] = useState('');
+  const accessToken = localStorage.getItem("access_token");
+  console.log(accessToken);
+  const [inputTitle, setInputTitle] = useState("");
+  const [inputDescription, setInputDescription] = useState("");
+  const [inputCategory, setInputCategory] = useState("");
+  const [inputType, setInputType] = useState("");
+  const [inputDistrict, setInputDistrict] = useState("");
+  const [inputCity, setInputCity] = useState("");
   const [inputSize, setInputSize] = useState(0);
   const [inputBed, setInputBed] = useState(0);
   const [inputBath, setInputBath] = useState(0);
   const [inputPrice, setInputPrice] = useState(0);
 
-  const [displayImage, setDisplayImage] = useState('');
-  const [displayFileImage, setDisplayFileImage] = useState('');
+  const [displayImage, setDisplayImage] = useState("");
+  const [displayFileImage, setDisplayFileImage] = useState("");
   const [errorDisplayImage, setErrorDisplayImage] = useState(false);
   const [errorCategoty, setErrorCategory] = useState(false);
   const [errorType, setErrorType] = useState(false);
@@ -91,35 +91,36 @@ console.log(accessToken);
       // createdAt: new Date(Date.now()).toISOString(),
     };
 
-    fetch(process.env.REACT_APP_API_URL + '/properties',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
-        },
-        body: JSON.stringify(inputData)
-      })
-      .then(response => response.json())
-      .then(data => {
+    fetch(process.env.REACT_APP_API_URL + "/properties", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(inputData),
+    })
+      .then((response) => response.json())
+      .then((data) => {
         if (data?.success) {
-          navigate('/');
+          navigate("/");
         }
       })
-      .catch(error => {
+      .catch((error) => {
         // Handle any errors
-        console.error('Error:', error);
-      }).finally(() => {
-        setLoading(false);
+        console.error("Error:", error);
       })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
-  const getBase64 = file => new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-  });
+  const getBase64 = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+    });
 
   const handleUploadDisplayImg = async (e) => {
     e.preventDefault();
@@ -147,8 +148,8 @@ console.log(accessToken);
   };
 
   const handleDelete = async (inputData) => {
-    setDisplayImage('');
-    setDisplayFileImage('');
+    setDisplayImage("");
+    setDisplayFileImage("");
   };
   const handleDeleteOthers = async (inputData) => {
     const index = othersImage.findIndex((item) => item === inputData);
@@ -159,23 +160,22 @@ console.log(accessToken);
   };
 
   const getCategories = () => {
-    return fetch(process.env.REACT_APP_API_URL + '/categories',
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        },
-      })
-      .then(response => response.json())
-      .then(data => {
+    return fetch(process.env.REACT_APP_API_URL + "/categories", {
+      method: "GET",
+      // headers: {
+      //   "Content-Type": "application/json",
+      //   Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      // },
+    })
+      .then((response) => response.json())
+      .then((data) => {
         setCategories(data);
       })
-      .catch(error => {
+      .catch((error) => {
         // Handle any errors
-        console.error('Error:', error);
+        console.error("Error:", error);
       });
-  }
+  };
 
   useEffect(() => {
     getCategories();
@@ -183,58 +183,80 @@ console.log(accessToken);
 
   return (
     <SellerLayout>
-      <div className='max-w-screen-2xl mx-auto min-h-[80vh] px-2 flex flex-col justify-center items-center py-10'>
-        <h1 className='text-4xl font-semibold'>Create Post</h1>
+      <div className="max-w-screen-2xl mx-auto min-h-[80vh] px-2 flex flex-col justify-center items-center py-10">
+        <h1 className="text-4xl font-semibold">Create Post</h1>
 
-        <form className='w-full flex flex-col items-center mt-10 gap-5' onSubmit={(e) => handleSubmitPost(e)}>
-          <label className='form-control w-full max-w-lg'>
-            <div className='label'>
-              <span className='label-text text-xl'>Title</span>
+        <form
+          className="w-full flex flex-col items-center mt-10 gap-5"
+          onSubmit={(e) => handleSubmitPost(e)}
+        >
+          <label className="form-control w-full max-w-lg">
+            <div className="label">
+              <span className="label-text text-xl">Title</span>
             </div>
             <input
-              type='text'
+              type="text"
               value={inputTitle}
               onChange={(e) => setInputTitle(e.target.value)}
-              className='input input-bordered w-full max-w-lg'
+              className="input input-bordered w-full max-w-lg"
               required
             />
           </label>
-          <label className='form-control w-full max-w-lg'>
-            <div className='label'>
-              <span className='label-text text-xl'>Description</span>
+          <label className="form-control w-full max-w-lg">
+            <div className="label">
+              <span className="label-text text-xl">Description</span>
             </div>
             <textarea
-              type='text'
+              type="text"
               value={inputDescription}
               onChange={(e) => setInputDescription(e.target.value)}
-              className='input input-bordered py-2 w-full max-w-lg min-h-[100px]'
+              className="input input-bordered py-2 w-full max-w-lg min-h-[100px]"
               required
             />
           </label>
 
-          <div className='space-y-2 flex flex-col justify-start items-start w-full max-w-lg'>
-            <label htmlFor='category' className={cn('text-lg font-semibold', errorDisplayImage ? 'text-red-500' : '')}>
+          <div className="space-y-2 flex flex-col justify-start items-start w-full max-w-lg">
+            <label
+              htmlFor="category"
+              className={cn(
+                "text-lg font-semibold",
+                errorDisplayImage ? "text-red-500" : ""
+              )}
+            >
               Display Picture
             </label>
             {displayImage ? null : (
               <>
                 <button>
-                  <input type='file' onChange={(e) => handleUploadDisplayImg(e)} />
+                  <input
+                    type="file"
+                    onChange={(e) => handleUploadDisplayImg(e)}
+                  />
                 </button>
-                {errorDisplayImage && <p className='text-sm font-medium text-red-500'>Display Image is required</p>}
+                {errorDisplayImage && (
+                  <p className="text-sm font-medium text-red-500">
+                    Display Image is required
+                  </p>
+                )}
               </>
             )}
 
             {!displayImage ? null : (
-              <div className='border shadow-none rounded-md w-full max-w-lg'>
-                <div className='p-2'>
-                  <div className='flex items-center justify-between'>
-                    <div className={`w-[180px] h-[100px] bg-gray-50 rounded-md flex items-center justify-center`}>
-                      <img src={displayImage} alt='hi' className='w-full h-full object-contain' />
+              <div className="border shadow-none rounded-md w-full max-w-lg">
+                <div className="p-2">
+                  <div className="flex items-center justify-between">
+                    <div
+                      className={`w-[180px] h-[100px] bg-gray-50 rounded-md flex items-center justify-center`}
+                    >
+                      <img
+                        src={displayImage}
+                        alt="hi"
+                        className="w-full h-full object-contain"
+                      />
                     </div>
                     <button
-                      type='button'
-                      className='mr-5 border px-4 py-2 rounded-md text-red-500'
+                      type="button"
+                      className="mr-5 border px-4 py-2 rounded-md text-red-500"
                       onClick={() => handleDelete(displayImage)}
                     >
                       <Trash2 />
@@ -281,41 +303,49 @@ console.log(accessToken);
                 })}
           </div> */}
 
-          <label className='form-control w-full max-w-lg'>
-            <div className='label'>
-              <span className='label-text text-xl'>Category</span>
+          <label className="form-control w-full max-w-lg">
+            <div className="label">
+              <span className="label-text text-xl">Category</span>
             </div>
             <select
-              className='select select-bordered w-full max-w-xs'
-              defaultValue={'default'}
+              className="select select-bordered w-full max-w-xs"
+              defaultValue={"default"}
               onChange={(e) => setInputCategory(e.target.value)}
             >
-              <option disabled value={'default'}>
+              <option disabled value={"default"}>
                 Please select category
               </option>
               {categories.map((item) => {
-                return <option value={item.id}>{item.name}</option>
+                return <option value={item.id}>{item.name}</option>;
               })}
             </select>
-            {errorCategoty && <p className='text-sm font-medium text-red-500'>Please select any cateogry.</p>}
+            {errorCategoty && (
+              <p className="text-sm font-medium text-red-500">
+                Please select any cateogry.
+              </p>
+            )}
           </label>
-          <label className='form-control w-full max-w-lg'>
-            <div className='label'>
-              <span className='label-text text-xl'>Type</span>
+          <label className="form-control w-full max-w-lg">
+            <div className="label">
+              <span className="label-text text-xl">Type</span>
             </div>
             <select
-              className='select select-bordered w-full max-w-xs'
-              defaultValue={'default'}
+              className="select select-bordered w-full max-w-xs"
+              defaultValue={"default"}
               onChange={(e) => setInputType(e.target.value)}
             >
-              <option disabled value={'default'}>
+              <option disabled value={"default"}>
                 Please select type
               </option>
-              <option value='sale'>For sale</option>
-              <option value='rent'>For rent</option>
-              <option value='booking'>For booking</option>
+              <option value="sale">For sale</option>
+              <option value="rent">For rent</option>
+              <option value="booking">For booking</option>
             </select>
-            {errorType && <p className='text-sm font-medium text-red-500'>Please select any type.</p>}
+            {errorType && (
+              <p className="text-sm font-medium text-red-500">
+                Please select any type.
+              </p>
+            )}
           </label>
 
           {/* <label className='form-control w-full max-w-lg'>
@@ -384,21 +414,21 @@ console.log(accessToken);
             />
           </label> */}
 
-          <label className='form-control w-full max-w-lg'>
-            <div className='label'>
-              <span className='label-text text-xl'>Property Price</span>
+          <label className="form-control w-full max-w-lg">
+            <div className="label">
+              <span className="label-text text-xl">Property Price</span>
             </div>
             <input
-              type='number'
+              type="number"
               value={inputPrice}
               onChange={(e) => setInputPrice(Number(e.target.value))}
-              className='input input-bordered w-full max-w-lg'
+              className="input input-bordered w-full max-w-lg"
               required
             />
           </label>
 
-          <button type='submit' className='btn btn-primary mt-5'>
-            {loading ? 'Loading...' : 'Submit Post'}
+          <button type="submit" className="btn btn-primary mt-5">
+            {loading ? "Loading..." : "Submit Post"}
           </button>
         </form>
       </div>

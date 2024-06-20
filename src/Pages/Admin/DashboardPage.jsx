@@ -1,142 +1,184 @@
-
-import AdminLayout from '../../Layouts/AdminLayout';
+import { useEffect, useState } from "react";
+import AdminLayout from "../../Layouts/AdminLayout";
+import SellerLayout from "../../Layouts/SellerLayout";
+import { useSelector } from "react-redux";
 
 function DashboardPage() {
+  const user = useSelector((state) => state.auth.value);
+
+  const isAdmin = user?.role_id === "1";
+  const isSeller = user?.role_id === "2";
+
+  const [users, setUsers] = useState([]);
+  const [userSellers, setUserSellers] = useState([]);
+  const [userBuyers, setUserBuyers] = useState([]);
+  const [properties, setProperties] = useState([]);
+
+  const fetchUser = async () => {
+    try {
+      const response = await fetch(process.env.REACT_APP_API_URL + "/users");
+      const data = await response.json();
+      const filterUsers = data.filter((user) => user.role_id !== "1");
+      setUsers(filterUsers);
+
+      const filterUserSellers = data.filter((user) => user.role_id === "2");
+      setUserSellers(filterUserSellers);
+      const filterUserBuyers = data.filter((user) => user.role_id === "3");
+      setUserBuyers(filterUserBuyers);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  const fetchProperty = async () => {
+    try {
+      const response = await fetch(
+        process.env.REACT_APP_API_URL + "/properties"
+      );
+      const data = await response.json();
+      setProperties(data);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+    fetchProperty();
+  }, []);
+
+  console.log(properties.length);
   return (
     <AdminLayout>
-      <div class="grid grid-cols-3 gap-4 mb-4">
-        <div class="max-w-sm w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6">
-          <div class="flex justify-between">
+      <div className="grid grid-cols-3 gap-4 mb-4">
+        <a
+          href=""
+          className="max-w-sm w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6 cursor-pointer"
+        >
+          <div className="flex justify-between">
             <div>
-              <h5 class="leading-none text-3xl font-bold text-gray-900 dark:text-white pb-2">32.4k</h5>
-              <p class="text-base font-normal text-gray-500 dark:text-gray-400">Users this week</p>
+              <h5 className="leading-none text-3xl font-bold text-gray-900 dark:text-white pb-2">
+                {users.length}
+              </h5>
+              <p className="text-base font-normal text-gray-500 dark:text-gray-400">
+                Total Users
+              </p>
             </div>
-            <div
-              class="flex items-center px-2.5 py-0.5 text-base font-semibold text-green-500 dark:text-green-500 text-center">
+            {/* <div className="flex items-center px-2.5 py-0.5 text-base font-semibold text-green-500 dark:text-green-500 text-center">
               12%
-              <svg class="w-3 h-3 ms-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 14">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13V1m0 0L1 5m4-4 4 4" />
+              <svg
+                className="w-3 h-3 ms-1"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 10 14"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13V1m0 0L1 5m4-4 4 4"
+                />
               </svg>
-            </div>
+            </div> */}
           </div>
-          <div class="grid grid-cols-1 items-center border-gray-200 border-t dark:border-gray-700 justify-between">
-            <div class="flex justify-between items-center pt-5">
-              <button
-                id="dropdownDefaultButton"
-                data-dropdown-toggle="lastDaysdropdown"
-                data-dropdown-placement="bottom"
-                class="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 text-center inline-flex items-center dark:hover:text-white"
-                type="button">
-                Last 7 days
-                <svg class="w-2.5 m-2.5 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                </svg>
-              </button>
-              <div id="lastDaysdropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-                <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Yesterday</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Today</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Last 7 days</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Last 30 days</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Last 90 days</a>
-                  </li>
-                </ul>
-              </div>
-              <a
-                href="#"
-                class="uppercase text-sm font-semibold inline-flex items-center rounded-lg text-blue-600 hover:text-blue-700 dark:hover:text-blue-500  hover:bg-gray-100 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 px-3 py-2">
-                Users Report
-                <svg class="w-2.5 h-2.5 ms-1.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4" />
-                </svg>
-              </a>
-            </div>
-          </div>
-        </div>
-        <div class="max-w-sm w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6">
-          <div class="flex justify-between border-gray-200 border-b dark:border-gray-700 pb-3">
-            <dl>
-              <dt class="text-base font-normal text-gray-500 dark:text-gray-400 pb-1">Profit</dt>
-              <dd class="leading-none text-3xl font-bold text-gray-900 dark:text-white">$5,405</dd>
-            </dl>
+        </a>
+        <a className="max-w-sm w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6 cursor-pointer">
+          <div className="flex justify-between">
             <div>
-              <span class="bg-green-100 text-green-800 text-xs font-medium inline-flex items-center px-2.5 py-1 rounded-md dark:bg-green-900 dark:text-green-300">
-                <svg class="w-2.5 h-2.5 me-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 14">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13V1m0 0L1 5m4-4 4 4" />
-                </svg>
-                Profit rate 23.5%
-              </span>
+              <h5 className="leading-none text-3xl font-bold text-gray-900 dark:text-white pb-2">
+                {userSellers.length}
+              </h5>
+              <p className="text-base font-normal text-gray-500 dark:text-gray-400">
+                Total Sellers
+              </p>
             </div>
+            {/* <div className="flex items-center px-2.5 py-0.5 text-base font-semibold text-green-500 dark:text-green-500 text-center">
+              12%
+              <svg
+                className="w-3 h-3 ms-1"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 10 14"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13V1m0 0L1 5m4-4 4 4"
+                />
+              </svg>
+            </div> */}
           </div>
-
-          <div class="grid grid-cols-2 py-3">
-            <dl>
-              <dt class="text-base font-normal text-gray-500 dark:text-gray-400 pb-1">Income</dt>
-              <dd class="leading-none text-xl font-bold text-green-500 dark:text-green-400">$23,635</dd>
-            </dl>
-            <dl>
-              <dt class="text-base font-normal text-gray-500 dark:text-gray-400 pb-1">Expense</dt>
-              <dd class="leading-none text-xl font-bold text-red-600 dark:text-red-500">-$18,230</dd>
-            </dl>
-          </div>
-          <div class="grid grid-cols-1 items-center border-gray-200 border-t dark:border-gray-700 justify-between">
-            <div class="flex justify-between items-center pt-5">
-              <button
-                id="dropdownDefaultButton"
-                data-dropdown-toggle="lastDaysdropdown"
-                data-dropdown-placement="bottom"
-                class="text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 text-center inline-flex items-center dark:hover:text-white"
-                type="button">
-                Last 6 months
-                <svg class="w-2.5 m-2.5 ms-1.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
-                </svg>
-              </button>
-              <div id="lastDaysdropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
-                <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Yesterday</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Today</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Last 7 days</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Last 30 days</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Last 90 days</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Last 6 months</a>
-                  </li>
-                  <li>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Last year</a>
-                  </li>
-                </ul>
-              </div>
-              <a
-                href="#"
-                class="uppercase text-sm font-semibold inline-flex items-center rounded-lg text-blue-600 hover:text-blue-700 dark:hover:text-blue-500  hover:bg-gray-100 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700 px-3 py-2">
-                Revenue Report
-                <svg class="w-2.5 h-2.5 ms-1.5 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4" />
-                </svg>
-              </a>
+        </a>
+        <a
+          href=""
+          className="max-w-sm w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6 cursor-pointer"
+        >
+          <div className="flex justify-between">
+            <div>
+              <h5 className="leading-none text-3xl font-bold text-gray-900 dark:text-white pb-2">
+                {userBuyers.length}
+              </h5>
+              <p className="text-base font-normal text-gray-500 dark:text-gray-400">
+                Total Buyers
+              </p>
             </div>
+            {/* <div className="flex items-center px-2.5 py-0.5 text-base font-semibold text-green-500 dark:text-green-500 text-center">
+              12%
+              <svg
+                className="w-3 h-3 ms-1"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 10 14"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13V1m0 0L1 5m4-4 4 4"
+                />
+              </svg>
+            </div> */}
           </div>
-        </div>
+        </a>
+        <a
+          href=""
+          className="max-w-sm w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6 cursor-pointer"
+        >
+          <div className="flex justify-between">
+            <div>
+              <h5 className="leading-none text-3xl font-bold text-gray-900 dark:text-white pb-2">
+                {properties.length}
+              </h5>
+              <p className="text-base font-normal text-gray-500 dark:text-gray-400">
+                Total Properties
+              </p>
+            </div>
+            {/* <div className="flex items-center px-2.5 py-0.5 text-base font-semibold text-green-500 dark:text-green-500 text-center">
+              12%
+              <svg
+                className="w-3 h-3 ms-1"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 10 14"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M5 13V1m0 0L1 5m4-4 4 4"
+                />
+              </svg>
+            </div> */}
+          </div>
+        </a>
       </div>
     </AdminLayout>
   );

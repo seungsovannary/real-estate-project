@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
-import Nav from '../components/Nav';
-import Sidebar from '../components/Sidebar';
-import { useDispatch } from 'react-redux';
-import { logIn, logOut } from '../redux/slices/authSlice';
-import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useEffect, useState } from "react";
+import Nav from "../components/Nav";
+import Sidebar from "../components/Sidebar";
+import { useDispatch } from "react-redux";
+import { logIn, logOut } from "../redux/slices/authSlice";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 function SellerLayout({ children }) {
   const dispatch = useDispatch();
@@ -14,34 +14,36 @@ function SellerLayout({ children }) {
   const [loading, SetLoading] = useState(false);
 
   const getMe = async () => {
-    const url = process.env.REACT_APP_API_URL + '/me';
+    const url = process.env.REACT_APP_API_URL + "/me";
     const accessToken = localStorage.getItem("access_token");
 
     await fetch(url, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`
-      }
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
     })
-      .then(response => response.json())
-      .then(async data => {
+      .then((response) => response.json())
+      .then(async (data) => {
         // Do something with the response data
-        dispatch(logIn({ email: data.email, id: data.id, role_id: data.role_id }));
+        dispatch(
+          logIn({ email: data.email, id: data.id, role_id: data.role_id })
+        );
         checkRole(data.role_id);
         SetLoading(true);
       })
-      .catch(error => {
+      .catch((error) => {
         // Handle any errors
-        navigate('/sign-in');
+        navigate("/sign-in");
       });
-  }
+  };
 
   const checkRole = (role_id) => {
-    if (role_id == 2) {
-      navigate("/")
+    if (role_id === "3") {
+      navigate("/");
     }
-  }
+  };
 
   useEffect(() => {
     getMe();
@@ -56,9 +58,7 @@ function SellerLayout({ children }) {
       <Nav />
       <Sidebar />
       <div className="p-4 sm:ml-64 mt-[68px]">
-        <div className="p-4">
-          {children}
-        </div>
+        <div className="p-4">{children}</div>
       </div>
     </div>
   );

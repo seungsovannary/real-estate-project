@@ -2,7 +2,7 @@ import AdminLayout from "../../../Layouts/AdminLayout";
 import ItemCard from "../../../components/ItemCard";
 import { useEffect, useState } from "react";
 
-const PropertyPage = () => {
+const RequestPropertyPage = () => {
   const [searchValue, setSearchValue] = useState("");
 
   const [data, setData] = useState([]);
@@ -28,19 +28,19 @@ const PropertyPage = () => {
       });
   };
 
-  const getList = async (data = {}) => {
+  const getList = async (filteredData = {}) => {
     const queryParams = {};
 
-    if (data?.category_id) {
-      queryParams.category_id = data.category_id;
+    if (filteredData?.category_id) {
+      queryParams.category_id = filteredData.category_id;
     }
 
-    if (data?.type) {
-      queryParams.type = data.type;
+    if (filteredData?.type) {
+      queryParams.type = filteredData.type;
     }
 
-    if (data?.name) {
-      queryParams.name = data.name;
+    if (filteredData?.name) {
+      queryParams.name = filteredData.name;
     }
 
     const baseUrl = process.env.REACT_APP_API_URL + "/properties";
@@ -90,8 +90,7 @@ const PropertyPage = () => {
       category_id: inputType,
     });
   };
-  const filteredData = data.filter((item) => item?.status === "approved");
-
+  const filteredData = data.filter((item) => item?.status === "unapproved");
   return (
     <AdminLayout>
       <section className="w-full">
@@ -216,4 +215,4 @@ const PropertyPage = () => {
   );
 };
 
-export default PropertyPage;
+export default RequestPropertyPage;

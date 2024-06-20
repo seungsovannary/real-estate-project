@@ -1,10 +1,10 @@
-import AdminLayout from "../../../Layouts/AdminLayout";
-import ItemCard from "../../../components/ItemCard";
+import { useSelector } from "react-redux";
+import AdminLayout from "../../Layouts/AdminLayout";
 import { useEffect, useState } from "react";
 
 const PropertyPage = () => {
   const [searchValue, setSearchValue] = useState("");
-
+  const user = useSelector((state) => state.auth.value);
   const [data, setData] = useState([]);
   const [categories, setCategories] = useState([]);
 
@@ -28,19 +28,19 @@ const PropertyPage = () => {
       });
   };
 
-  const getList = async (data = {}) => {
+  const getList = async (filteredData = {}) => {
     const queryParams = {};
 
-    if (data?.category_id) {
-      queryParams.category_id = data.category_id;
+    if (filteredData?.category_id) {
+      queryParams.category_id = filteredData.category_id;
     }
 
-    if (data?.type) {
-      queryParams.type = data.type;
+    if (filteredData?.type) {
+      queryParams.type = filteredData.type;
     }
 
-    if (data?.name) {
-      queryParams.name = data.name;
+    if (filteredData?.name) {
+      queryParams.name = filteredData.name;
     }
 
     const baseUrl = process.env.REACT_APP_API_URL + "/properties";
@@ -57,6 +57,31 @@ const PropertyPage = () => {
       .then((response) => response.json())
       .then((data) => {
         setData(data);
+      })
+      .catch((error) => {
+        // Handle any errors
+        console.error("Error:", error);
+      });
+  };
+
+  const handleDelete = (e, item) => {
+    e.preventDefault();
+
+    const baseUrl = " process.env.REACT_APP_API_URL";
+    const apiUrl = `${baseUrl}/${item.id}`;
+
+    return fetch(apiUrl, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          getList();
+        }
       })
       .catch((error) => {
         // Handle any errors
@@ -90,8 +115,7 @@ const PropertyPage = () => {
       category_id: inputType,
     });
   };
-  const filteredData = data.filter((item) => item?.status === "approved");
-
+  const filteredData = data.filter((item) => item.user_id === user.id);
   return (
     <AdminLayout>
       <section className="w-full">
@@ -142,9 +166,6 @@ const PropertyPage = () => {
               </th>
               <th scope="col" class="px-6 py-3"></th>
               <th scope="col" class="px-6 py-3">
-                User
-              </th>
-              <th scope="col" class="px-6 py-3">
                 Type
               </th>
               <th scope="col" class="px-6 py-3">
@@ -187,7 +208,6 @@ const PropertyPage = () => {
                   </a>
                 </th>
                 <th></th>
-                <td class="px-6 py-4">{data?.user?.name}</td>
                 <td class="px-6 py-4">{String(data?.type).toUpperCase()}</td>
                 <td className="px-6 py-4">
                   {String(data?.category?.name).toUpperCase()}
@@ -211,6 +231,22 @@ const PropertyPage = () => {
             ))}
           </tbody>
         </table>
+        {/* <Link
+                    to={"/admin/datas/" + data?.id + "/edit"}
+                    className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                  >
+                    Edit data
+                  </Link> */}
+        {/* <div className="w-full flex items-center justify-between">
+          <h1 className="text-3xl font-semibold">Browse</h1>
+        </div>
+        <div className="mt-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 lg:gap-7">
+          {data.map((item) => {
+            return (
+              <ItemCard key={item.id} item={item} handleDelete={handleDelete} />
+            );
+          })}
+        </div> */}
       </section>
     </AdminLayout>
   );
