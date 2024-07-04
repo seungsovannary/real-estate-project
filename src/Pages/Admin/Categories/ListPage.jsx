@@ -83,7 +83,7 @@ function CategoryPage() {
               type="text"
               id="table-search-users"
               className="block p-2 ps-10 text-sm input input-bordered"
-              placeholder="Search for users"
+              placeholder="Search for category"
             />
           </div>
           <div className="flex gap-4">
@@ -114,35 +114,35 @@ function CategoryPage() {
           </thead>
           <tbody>
             {users.map((user) => (
-            <tr className="bg-white border-b hover:bg-gray-50">
-              <th
-                scope="row"
-                className="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap"
-              >
-                <p>{user.id}</p>
-              </th>
-              <th scope="colspan-2" className="px-12 py-4">
-                <p>{user.name}</p>
-              </th>
-              <th className="px-12 py-4"></th>
-              <td className="pl-6 py-4">
-                <Link
-                  onClick={() => handleOpenModal("Edit Category", true)}
-                  className="font-medium text-blue-600 dark:text-blue-500 hover:underline mr-4"
+              <tr className="bg-white border-b hover:bg-gray-50">
+                <th
+                  scope="row"
+                  className="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap"
                 >
-                  Edit
-                </Link>
-                <Link
-                  onClick={() =>
-                    handleOpenModal("Detele Category", false, true)
-                  }
-                  className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                >
-                  Delete
-                </Link>
-              </td>
-            </tr>
-             ))}
+                  <p>{user.id}</p>
+                </th>
+                <th scope="colspan-2" className="px-12 py-4">
+                  <p>{user.name}</p>
+                </th>
+                <th className="px-12 py-4"></th>
+                <td className="pl-6 py-4">
+                  <Link
+                    onClick={() => handleOpenModal("Edit Category", true)}
+                    className="font-medium text-blue-600 dark:text-blue-500 hover:underline mr-4"
+                  >
+                    Edit
+                  </Link>
+                  <Link
+                    onClick={() =>
+                      handleOpenModal("Detele Category", false, true)
+                    }
+                    className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
+                  >
+                    Delete
+                  </Link>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
         {openModal && (

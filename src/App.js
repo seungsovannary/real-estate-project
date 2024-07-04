@@ -23,6 +23,10 @@ import AdminRequestPropertyPage from "./Pages/Admin/Properties/RequestListPage";
 import SellerDashboardPage from "./Pages/Seller/DashboardPage";
 import SellerPropertyPage from "./Pages/Seller/ListPage";
 import SellerPropertyCreatePage from "./Pages/Seller/CreatePage";
+import LeafletMap from "./Pages/_Test";
+
+import BuyerPropertyPage from "./Pages/Buyer/ListPage";
+// import MapboxMap from "./Pages/_Test";
 // import SellerCategoryPage from './Pages/Seller/Categories/ListPage';
 
 const router = createBrowserRouter(
@@ -59,6 +63,12 @@ const router = createBrowserRouter(
         />
         {/* <Route path='categories' element={<SellerCategoryPage />} /> */}
       </Route>
+
+      <Route path="buyer">
+        <Route index element={<BuyerPropertyPage />} />
+        <Route path="properties" element={<BuyerPropertyPage />} />
+      </Route>
+      <Route path="test" element={<LeafletMap />} />
     </Route>
   )
 );

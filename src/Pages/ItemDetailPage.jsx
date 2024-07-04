@@ -7,7 +7,9 @@ import {
   PhoneCall,
   Star,
   StarHalf,
+  Save,
   Trash2,
+  BookMarked,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import MainLayout from "../Layouts/MainLayout";
@@ -15,12 +17,36 @@ import MainLayout from "../Layouts/MainLayout";
 import { useSelector } from "react-redux";
 import { db } from "../config/firebaseconfig";
 import cn from "../utils/cn";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import axios from "axios";
+import L from "leaflet";
+import Share from "../components/Share";
+import { FaSave } from "react-icons/fa";
+
+// Remove the default icon URLs to fix the missing icon issue
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+});
+
+const UpdateMapView = ({ location }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (location) {
+      map.setView([location.lat, location.lng], 15); // Set the view to the new location with zoom level 15
+    }
+  }, [location, map]);
+  return null;
+};
 
 const ItemDetailPage = () => {
   const user = useSelector((state) => state.auth.value);
   const itemId = useParams();
   const [data, setData] = useState();
-
   const [inputReview, setInputReview] = useState("");
   const [rating, setRating] = useState(0);
   const [starTemp, setStarTemp] = useState(0);
@@ -40,13 +66,16 @@ const ItemDetailPage = () => {
         setStatus(data?.status);
         setInputCategories(data?.category_id);
         setUserId(data?.user_id);
+        setLocation({
+          lat: parseFloat(data?.latitude),
+          lng: parseFloat(data?.longitude),
+        });
       })
       .catch((error) => {
         // Handle any errors
         console.error("Error:", error);
       });
   };
-  console.log(data);
 
   useEffect(() => {
     getDetail();
@@ -121,14 +150,11 @@ const ItemDetailPage = () => {
   const [errorDisplayImage, setErrorDisplayImage] = useState(false);
   const [errorCategoty, setErrorCategory] = useState(false);
   const [errorType, setErrorType] = useState(false);
-
+  const [location, setLocation] = useState(null);
   const [othersImage, setOthersImage] = useState([]);
   const [othersFileImage, setOthersFileImage] = useState([]);
-
   const [categories, setCategories] = useState([]);
-
   const [loading, setLoading] = useState(false);
-
   const navigate = useNavigate();
 
   const handleSubmitUpdate = async (e) => {
@@ -209,7 +235,6 @@ const ItemDetailPage = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
         navigate("/admin/properties");
       })
       .catch((error) => {
@@ -286,9 +311,87 @@ const ItemDetailPage = () => {
       });
   };
 
+  const [saved, setSaved] = useState(null);
+  const fetchSaved = () => {
+    return fetch(`${process.env.REACT_APP_API_URL}/saved/${itemId.id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    })
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        setSaved(data); // Directly set the boolean response to `saved` state
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
   useEffect(() => {
     getCategories();
-  }, []);
+    if (user?.value?.email !== "") {
+      fetchSaved();
+    } else {
+      return;
+    }
+  }, [user]);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    fetch(`${process.env.REACT_APP_API_URL}/saves`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+      body: JSON.stringify({ property_id: itemId.id }),
+    })
+      .then((response) => {
+        setLoading(false);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        console.log("Property saved successfully");
+        setSaved(true);
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.error("Error:", error);
+      });
+  };
+
+  const handleUnsave = () => {
+    setLoading(true);
+
+    fetch(`${process.env.REACT_APP_API_URL}/unsaved/${itemId.id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+      },
+    })
+      .then((response) => {
+        setLoading(false);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        console.log("Property unsaved successfully");
+        setSaved(false);
+        // Optionally, update UI state or navigate after successful unsave
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.error("Error:", error);
+      });
+  };
+
+  const propertyUrl = `http://localhost:3001/item/${data?.id}`;
+  const message = `Check out this property: ${data?.name}`;
 
   return (
     <MainLayout>
@@ -302,11 +405,28 @@ const ItemDetailPage = () => {
               <MapPin className="w-5 h-5" />
               <p className="text-md">{data?.details?.location.join(", ")}</p>
             </div> */}
+            {loading ? (
+              ""
+            ) : user?.value?.email !== "" ? (
+              saved ? (
+                <button className="btn btn-primary" onClick={handleUnsave}>
+                  <BookMarked />
+                  Unsave
+                </button>
+              ) : (
+                <button className="btn btn-primary" onClick={handleSave}>
+                  <BookMarked />
+                  Save
+                </button>
+              )
+            ) : (
+              ""
+            )}
           </div>
           <div>
             <h1 className="text-3xl">${data?.price?.toLocaleString()}</h1>
           </div>
-          {user?.role_id === "2" ? (
+          {user?.id === data?.user_id ? (
             <div>
               <button
                 type="submit"
@@ -317,16 +437,17 @@ const ItemDetailPage = () => {
               </button>
             </div>
           ) : (
-            ""  
+            <Share propertyUrl={propertyUrl} message={message} />
           )}
         </div>
         {/* IMAGES */}
         <div className="grid grid-cols-12 h-[500px] gap-5 mt-5">
-          <div className="col-span-6 h-full overflow-hidden">
+          <div className="col-span-6 h-full overflow-hidden space-y-4">
+            <p>Property Owner : {data?.user?.name}</p>
             <img
               src={data?.image}
               alt="ji"
-              className="h-full w-full object-cover rounded-xl"
+              className="h-96 w-96 object-cover rounded-xl border border-black"
             />
           </div>
 
@@ -334,7 +455,7 @@ const ItemDetailPage = () => {
             <img src={data?.allImages[0]} alt='ji' className='h-full w-full object-cover rounded-xl' />{' '}
           </div> */}
 
-          {user?.role_id === "2" ? (
+          {user?.id === data?.user_id ? (
             <div className="col-span-6 flex flex-col gap-5 overflow-y-auto">
               <form
                 className="w-full flex flex-col items-center mt-10 gap-5"
@@ -505,12 +626,25 @@ const ItemDetailPage = () => {
             </div> */}
             </div>
           ) : (
-            ""
+            <div className="col-span-6 h-full gap-5 pr-16">
+              <MapContainer
+                center={[11.5449, 104.8922]}
+                zoom={15} // Default zoom level for initial load
+                className="w-full h-96 mt-10"
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                {location && <Marker position={[location.lat, location.lng]} />}
+                <UpdateMapView location={location} />
+              </MapContainer>
+            </div>
           )}
         </div>
 
         {/* Info section */}
-        {user?.role_id !== "2" ? (
+        {user?.role_id !== "" ? (
           <>
             <div className="grid grid-cols-12 mt-10 gap-5">
               {/* OVERVIEW */}
@@ -618,7 +752,8 @@ const ItemDetailPage = () => {
                     </form>
                   </>
                 ) : user?.role_id === "1" ? (
-                  data?.status.toLowerCase() === "unapproved" ? (
+                  data?.status.toLowerCase() === "unapproved" ||
+                  data?.status.toLowerCase() === "pending" ? (
                     <>
                       <h3 className="text-xl font-semibold ">Approved</h3>
                       <button
@@ -648,7 +783,7 @@ const ItemDetailPage = () => {
               <div className="border rounded-lg col-span-8 p-5">
                 <h3 className="text-xl font-semibold">Details</h3>
 
-                <div className="grid grid-cols-3 mt-5 gap-y-3">
+                <div className="flex flex-col space-y-4">
                   {/* <div className="flex gap-2">
                 <p className=" font-semibold">Bathroom:</p>
                 <p className="text-gray-500">{data?.details?.bath}</p>
@@ -662,18 +797,44 @@ const ItemDetailPage = () => {
                 <p className="text-gray-500">Brick</p>
               </div> */}
                   <div className="flex gap-2">
-                    <p className=" font-semibold">Property Price</p>
-                    <p className="text-gray-500">
-                      ${data?.price.toLocaleString()}
-                    </p>
+                    <p className=" font-semibold">Property Name:</p>
+                    <p className="text-gray-500">{data?.name}</p>
                   </div>
                   <div className="flex gap-2">
                     <p className=" font-semibold">Property Type:</p>
                     <p className="text-gray-500">{data?.category.name}</p>
                   </div>
                   <div className="flex gap-2">
-                    <p className=" font-semibold">property status:</p>
+                    <p className=" font-semibold">Property status:</p>
                     <p className="text-gray-500">For {data?.type}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <p className=" font-semibold">Property Price</p>
+                    <p className="text-gray-500">
+                      ${data?.price.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <p className=" font-semibold">Property Address:</p>
+                    <p className="text-gray-500">{data?.address}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <p className=" font-semibold">Property Street:</p>
+                    <p className="text-gray-500">{data?.street}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <p className=" font-semibold">
+                      Property Sangkat / Commune:
+                    </p>
+                    <p className="text-gray-500">{data?.village_name}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <p className=" font-semibold">Property Khan / District::</p>
+                    <p className="text-gray-500">{data?.town_name}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <p className=" font-semibold">City / Province:</p>
+                    <p className="text-gray-500">{data?.state_name}</p>
                   </div>
                 </div>
               </div>
