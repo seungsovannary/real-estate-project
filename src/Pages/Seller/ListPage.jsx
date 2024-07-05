@@ -81,6 +81,8 @@ const PropertyPage = () => {
     }
   };
 
+  console.log(data);
+
   useEffect(() => {
     getCategories();
     getStates();

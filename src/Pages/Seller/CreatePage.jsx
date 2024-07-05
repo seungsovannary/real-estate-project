@@ -225,6 +225,8 @@ const CreatePostPage = () => {
   const [errorOthersImage, setErrorOthersImage] = useState(false);
   const [categories, setCategories] = useState([]);
 
+  const [url, setUrl] = useState("");
+
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -330,38 +332,15 @@ const CreatePostPage = () => {
     e.preventDefault();
 
     const inputData = e.target.files[0];
+    const base64Url = await getBase64(inputData);
 
-    const Url = await getBase64(inputData);
-
-    setDisplayImage(Url);
+    setDisplayImage(base64Url);
     setDisplayFileImage(inputData);
-  };
-
-  const handleUploadOtherImg = async (e) => {
-    e.preventDefault();
-
-    const inputData = Array.from(e.target.files);
-    setOthersFileImage(inputData);
-
-    inputData.map((img) => {
-      const Url = URL.createObjectURL(img);
-      console.log(Url);
-
-      setOthersImage((prev) => [...prev, Url]);
-    });
   };
 
   const handleDelete = async (inputData) => {
     setDisplayImage("");
     setDisplayFileImage("");
-  };
-
-  const handleDeleteOthers = async (inputData) => {
-    const index = othersImage.findIndex((item) => item === inputData);
-    setOthersImage((prev) => prev.filter((item) => item !== inputData));
-    const data = othersFileImage;
-    data.splice(index, 1);
-    setOthersFileImage(data);
   };
 
   const getCategories = () => {

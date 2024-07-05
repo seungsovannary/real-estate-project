@@ -2,6 +2,7 @@ import { useSelector } from "react-redux";
 import AdminLayout from "../../Layouts/AdminLayout";
 import { useEffect, useState } from "react";
 import BuyerLayout from "../../Layouts/BuyerLayout";
+import * as XLSX from "xlsx";
 
 const PropertyPage = () => {
   const [searchValue, setSearchValue] = useState("");
@@ -92,41 +93,75 @@ const PropertyPage = () => {
       category_id: inputType,
     });
   };
+
   const filteredData = data.filter((item) => item.user_id === user.id);
+  const downloadExcel = () => {
+    console.log(filteredData);
+    const data = filteredData.map((item) => ({
+      ID: item.id,
+      Name: item.property?.name,
+      Description: item.property?.description,
+      Type: item.property?.type,
+      Category: item.property?.category?.name,
+      Price: item.property?.price,
+      Address: item.property?.address,
+      Street: item.property?.street,
+      "State Name": item.property?.state_name,
+      "Town Name": item.property?.town_name,
+      "Village Name": item.property?.village_name,
+      Latitude: item.property?.latitude,
+      Longitude: item.property?.longitude,
+    }));
+    console.log(data);
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Properties");
+
+    XLSX.writeFile(workbook, "properties.xlsx");
+  };
+
   return (
     <BuyerLayout>
       <section className="w-full my-10">
-        <table class="w-full text-sm text-left rtl:text-right text-gray-500 ">
-          <thead class="text-xs text-gray-700 uppercase bg-gray-50 ">
+        <div className="mb-4">
+          <button
+            onClick={downloadExcel}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+          >
+            Download Properties as Excel
+          </button>
+        </div>
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-              <th scope="colspan-2" class="px-6 py-3">
+              <th scope="colspan-2" className="px-6 py-3">
                 Title
               </th>
-              <th scope="col" class="px-6 py-3"></th>
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" className="px-6 py-3"></th>
+              <th scope="col" className="px-6 py-3">
                 Type
               </th>
-              <th scope="col" class="px-6 py-3">
+              <th scope="col" className="px-6 py-3">
                 Category
               </th>
-              <th scope="col" class="px-6 py-3">
-                price
+              <th scope="col" className="px-6 py-3">
+                Price
               </th>
-              <th scope="col" class="px-6 py-3">
-                city/provice
+              <th scope="col" className="px-6 py-3">
+                City/Province
               </th>
             </tr>
           </thead>
           <tbody>
-            {data?.map((data, index) => (
+            {filteredData.map((data, index) => (
               <tr
                 key={index}
                 scope="colspan-2"
-                class="bg-white border-b  hover:bg-gray-50  "
+                className="bg-white border-b hover:bg-gray-50"
               >
                 <th
                   scope="row"
-                  class="flex it  ems-center px-6 py-4 text-gray-900 whitespace-nowrap  "
+                  className="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap"
                 >
                   <a
                     className="flex"
@@ -136,18 +171,18 @@ const PropertyPage = () => {
                     {data?.property?.image ? (
                       <img
                         src={data?.property?.image}
-                        class="w-24 h-fit "
+                        className="w-24 h-fit"
                         alt="image"
                       />
                     ) : (
                       <img
-                        class="w-16 h-16 rounded-full"
+                        className="w-16 h-16 rounded-full"
                         src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
                         alt="avatar"
                       />
                     )}
-                    <div class="ps-3">
-                      <div class="text-base font-semibold">
+                    <div className="ps-3">
+                      <div className="text-base font-semibold">
                         {data?.property?.name}
                       </div>
                       <p className="font-normal text-gray-500 w-40 overflow-hidden text-ellipsis whitespace-wrap">
@@ -157,36 +192,20 @@ const PropertyPage = () => {
                   </a>
                 </th>
                 <th></th>
-                <td class="px-6 py-4">
+                <td className="px-6 py-4">
                   {String(data?.property?.type).toUpperCase()}
                 </td>
                 <td className="px-6 py-4">
                   {String(data?.property?.category?.name).toUpperCase()}
                 </td>
-                <td class="px-6 py-4">${data?.property?.price}</td>
-                <td class="px-6 py-4">
+                <td className="px-6 py-4">${data?.property?.price}</td>
+                <td className="px-6 py-4">
                   {String(data?.property?.state_name).toUpperCase()}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {/* <Link
-                      to={"/admin/datas/" + data?.id + "/edit"}
-                      className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
-                    >
-                      Edit data
-                    </Link> */}
-        {/* <div className="w-full flex items-center justify-between">
-            <h1 className="text-3xl font-semibold">Browse</h1>
-          </div>
-          <div className="mt-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 lg:gap-7">
-            {data.map((item) => {
-              return (
-                <ItemCard key={item.id} item={item} handleDelete={handleDelete} />
-              );p
-            })}
-          </div> */}
       </section>
     </BuyerLayout>
   );
