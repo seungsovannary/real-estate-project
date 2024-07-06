@@ -81,8 +81,6 @@ const PropertyPage = () => {
     }
   };
 
-  console.log(data);
-
   useEffect(() => {
     getCategories();
     getStates();
@@ -250,8 +248,8 @@ const PropertyPage = () => {
       </section>
 
       <section className="w-full my-10">
-        <table class="w-full text-sm text-left rtl:text-right text-gray-500 ">
-          <thead class="text-xs text-gray-700 uppercase bg-gray-50 ">
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500 ">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
             <tr>
               <th scope="col" className="px-6 py-3">
                 Title

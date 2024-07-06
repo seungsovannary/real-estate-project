@@ -10,53 +10,59 @@ function DashboardPage() {
   const [propertiesSellerUnapprove, setPropertiesSellerUnapprove] = useState(
     []
   );
+  const [error, setError] = useState("");
+  console.log(user);
 
   const fetchProperty = async () => {
     try {
       const response = await fetch(
-        process.env.REACT_APP_API_URL + "/properties"
+        `${process.env.REACT_APP_API_URL}/properties`
       );
+      if (!response.ok) {
+        throw new Error("Failed to fetch properties");
+      }
+
       const data = await response.json();
 
-      const properties = data.filter(
-        (property) => property.user_id,
-        toString() === user?.role_id.toString()
+      const userProperties = data.filter(
+        (property) => property.user_id === user.id
       );
-      setPropertiesSeller(properties);
 
-      const propertiesApprove = data.filter(
-        (property) =>
-          property.status.toString().toLocaleLowerCase() === "approved"
-      );
-      setPropertiesSellerApprove(propertiesApprove);
+      setPropertiesSeller(userProperties);
 
-      const propertiesUnapprove = data.filter(
-        (property) =>
-          property.status.toString().toLocaleLowerCase() === "unapproved"
+      setPropertiesSellerApprove(
+        userProperties.filter(
+          (property) => property.status.toLowerCase() === "approved"
+        )
       );
-      setPropertiesSellerUnapprove(propertiesUnapprove);
 
-      const propertiesPending = data.filter(
-        (property) =>
-          property.status.toString().toLocaleLowerCase() === "pending"
+      setPropertiesSellerUnapprove(
+        userProperties.filter(
+          (property) => property.status.toLowerCase() === "unapproved"
+        )
       );
-      setPropertiesSellerPending(propertiesPending);
+
+      setPropertiesSellerPending(
+        userProperties.filter(
+          (property) => property.status.toLowerCase() === "pending"
+        )
+      );
     } catch (error) {
       console.error("Error:", error);
+      setError("An error occurred while fetching properties.");
     }
   };
 
   useEffect(() => {
     fetchProperty();
-  }, []);
+  }, [user]);
 
   return (
     <SellerLayout>
       <div className="grid grid-cols-3 gap-4 mb-4">
-        <a
-          href=""
-          className="max-w-sm w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6 cursor-pointer"
-        >
+        {error && <div className="col-span-3 text-red-500">{error}</div>}
+
+        <div className="max-w-sm w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6 cursor-pointer">
           <div className="flex justify-between">
             <div>
               <h5 className="leading-none text-3xl font-bold text-gray-900 dark:text-white pb-2">
@@ -67,9 +73,9 @@ function DashboardPage() {
               </p>
             </div>
           </div>
-        </a>
+        </div>
 
-        <a className="max-w-sm w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6 cursor-pointer">
+        <div className="max-w-sm w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6 cursor-pointer">
           <div className="flex justify-between">
             <div>
               <h5 className="leading-none text-3xl font-bold text-gray-900 dark:text-white pb-2">
@@ -80,8 +86,9 @@ function DashboardPage() {
               </p>
             </div>
           </div>
-        </a>
-        <a className="max-w-sm w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6 cursor-pointer">
+        </div>
+
+        <div className="max-w-sm w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6 cursor-pointer">
           <div className="flex justify-between">
             <div>
               <h5 className="leading-none text-3xl font-bold text-gray-900 dark:text-white pb-2">
@@ -92,11 +99,9 @@ function DashboardPage() {
               </p>
             </div>
           </div>
-        </a>
-        <a
-          href=""
-          className="max-w-sm w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6 cursor-pointer"
-        >
+        </div>
+
+        <div className="max-w-sm w-full bg-white rounded-lg shadow dark:bg-gray-800 p-4 md:p-6 cursor-pointer">
           <div className="flex justify-between">
             <div>
               <h5 className="leading-none text-3xl font-bold text-gray-900 dark:text-white pb-2">
@@ -107,7 +112,7 @@ function DashboardPage() {
               </p>
             </div>
           </div>
-        </a>
+        </div>
       </div>
     </SellerLayout>
   );

@@ -7,6 +7,13 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import axios from "axios";
 import L from "leaflet";
+import { app } from "../../../config/firebaseconfig";
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
 
 // Remove the default icon URLs to fix the missing icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -328,15 +335,27 @@ const CreatePostPage = () => {
       reader.onerror = reject;
     });
 
-  const handleUploadDisplayImg = async (e) => {
-    e.preventDefault();
+  const handleUploadDisplayImg = (e) => {
+    const file = e.target.files[0];
+    const storage = getStorage(app);
+    if (file) {
+      const fileName = new Date().getTime() + file.name;
+      const storageRef = ref(storage, `images/${fileName}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
 
-    const inputData = e.target.files[0];
-
-    const Url = await getBase64(inputData);
-
-    setDisplayImage(Url);
-    setDisplayFileImage(inputData);
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {},
+        (error) => {
+          console.error("Upload error:", error);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            setDisplayImage(downloadURL);
+          });
+        }
+      );
+    }
   };
 
   const handleUploadOtherImg = async (e) => {
@@ -654,13 +673,12 @@ const CreatePostPage = () => {
               </select>
 
               {/* Dropdown for village selection */}
-              <select
+              {/* <select
                 value={selectedVillage}
                 onChange={handleVillageChange}
                 className="border border-gray-300 rounded-lg p-2 mb-4"
               >
                 <option value="">Select a town...</option>
-                {/* Populate towns based on selected state */}
                 {towns?.map((town, index) => {
                   if (selectedTown === town.name) {
                     return (
@@ -680,7 +698,7 @@ const CreatePostPage = () => {
                   }
                   return null;
                 })}
-              </select>
+              </select> */}
             </div>
 
             {/* Map container */}

@@ -407,7 +407,9 @@ const ItemDetailPage = () => {
             </div> */}
             {loading ? (
               ""
-            ) : user?.value?.email !== "" ? (
+            ) : user?.id !== "" &&
+              user.role_id !== "1" &&
+              user.id !== data.user_id ? (
               saved ? (
                 <button className="btn btn-primary" onClick={handleUnsave}>
                   <BookMarked />
@@ -697,16 +699,13 @@ const ItemDetailPage = () => {
                 {user?.role_id === "3" ? (
                   <>
                     <h3 className="text-xl font-semibold">Contact</h3>
-
-                    {/* Contact Person Info (Commented out section) */}
-
                     <form className="w-full flex flex-col items-center mt-10 gap-5">
                       <label className="form-control w-full max-w-lg">
                         <div className="label">
                           <span className="label-text text-xl">Full name</span>
                         </div>
                         <input
-                          type="firstname"
+                          type="text"
                           placeholder="Enter your full name"
                           className="input input-bordered w-full max-w-lg"
                         />
@@ -730,7 +729,7 @@ const ItemDetailPage = () => {
                           </span>
                         </div>
                         <input
-                          type="number"
+                          type="tel"
                           placeholder="Enter your phone number"
                           className="input input-bordered w-full max-w-lg"
                         />
@@ -752,20 +751,35 @@ const ItemDetailPage = () => {
                     </form>
                   </>
                 ) : user?.role_id === "1" ? (
-                  data?.status.toLowerCase() === "unapproved" ||
-                  data?.status.toLowerCase() === "pending" ? (
+                  data?.status.toLowerCase() === "unapproved" ? (
                     <>
-                      <h3 className="text-xl font-semibold ">Approved</h3>
+                      <h3 className="text-xl font-semibold">Unapproved</h3>
                       <button
                         onClick={handleSubmitApprove}
-                        className="btn btn-sm btn-success my-4  text-white"
+                        className="btn btn-sm btn-success my-4 text-white"
                       >
                         {loading ? "Loading" : "Approve"}
                       </button>
                     </>
-                  ) : (
+                  ) : data?.status.toLowerCase() === "approved" ? (
                     <>
                       <h3 className="text-xl font-semibold">Approved</h3>
+                      <button
+                        onClick={handleSubmitUnapprove}
+                        className="btn btn-sm bg-red-500 my-4 text-white"
+                      >
+                        {loading ? "Loading" : "Unapprove"}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="text-xl font-semibold">Unknown Status</h3>
+                      <button
+                        onClick={handleSubmitApprove}
+                        className="btn btn-sm btn-success my-4 text-white"
+                      >
+                        {loading ? "Loading" : "Approve"}
+                      </button>
                       <button
                         onClick={handleSubmitUnapprove}
                         className="btn btn-sm bg-red-500 my-4 text-white"

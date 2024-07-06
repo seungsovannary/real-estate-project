@@ -129,11 +129,13 @@ const PropertyPage = () => {
   };
 
   const handleChangeStatus = (e) => {
-    setStatusFilter(e.target.value); // Update status filter state
+    setStatusFilter(e.target.value);
   };
 
   const filteredData = data.filter((item) =>
-    statusFilter ? item.status === statusFilter : true
+    statusFilter
+      ? item.status === statusFilter
+      : true && item.status !== "approved"
   );
 
   return (

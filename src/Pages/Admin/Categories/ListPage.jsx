@@ -3,20 +3,21 @@ import AdminLayout from "../../../Layouts/AdminLayout";
 import { Link } from "react-router-dom";
 
 function CategoryPage() {
-  const [users, setUsers] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [backUp, setBackUpData] = useState([]);
   const [searchValue, setSearchValue] = useState("");
   const [openModal, setOpenModal] = useState(false);
   const [category, setCategory] = useState("");
   const [title, setTitle] = useState("");
-  const [isDetele, setIsDelete] = useState(false);
+  const [isDelete, setIsDelete] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [categoryId, setCategoryId] = useState(null);
 
   const getList = async () => {
     return fetch(process.env.REACT_APP_API_URL + "/categories")
       .then((response) => response.json())
       .then((data) => {
-        setUsers(data);
+        setCategories(data);
         setBackUpData(data);
       })
       .catch((error) => {
@@ -31,25 +32,107 @@ function CategoryPage() {
 
   const handleSearch = (e) => {
     setSearchValue(e.target.value);
-    setUsers(
+    setCategories(
       backUp.filter((item) =>
-        String(item.email)
+        String(item.name)
           .toLowerCase()
           .includes(String(e.target.value).toLowerCase())
       )
     );
   };
 
-  const handleOpenModal = (newTitle, isEdit, isDelete) => {
+  const handleOpenModal = (newTitle, isEdit, isDelete, id = null) => {
     setOpenModal(true);
     setTitle(newTitle);
     if (isDelete === true) {
       setIsDelete(true);
+      setCategoryId(id);
     } else if (isEdit === true) {
       setIsEdit(true);
+      setCategoryId(id);
+      const categoryToEdit = categories.find((cat) => cat.id === id);
+      setCategory(categoryToEdit.name);
     } else {
       setIsEdit(false);
       setIsDelete(false);
+      setCategory("");
+    }
+  };
+
+  const handleCreate = async () => {
+    const newCategory = { name: category };
+    try {
+      const response = await fetch(
+        process.env.REACT_APP_API_URL + "/categories",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+          body: JSON.stringify(newCategory),
+        }
+      );
+      const data = await response.json();
+      console.log(data);
+      setCategories([...categories, data]);
+      setBackUpData([...categories, data]);
+      setOpenModal(false);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const handleUpdate = async () => {
+    const updatedCategory = { name: category };
+    try {
+      await fetch(`${process.env.REACT_APP_API_URL}/categories/${categoryId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        body: JSON.stringify(updatedCategory),
+      });
+      setCategories(
+        categories.map((cat) =>
+          cat.id === categoryId ? { ...cat, name: category } : cat
+        )
+      );
+      setBackUpData(
+        categories.map((cat) =>
+          cat.id === categoryId ? { ...cat, name: category } : cat
+        )
+      );
+      setOpenModal(false);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/categories/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      );
+      if (response.ok) {
+        setCategories(categories.filter((cat) => cat.id !== id));
+        setBackUpData(categories.filter((cat) => cat.id !== id));
+        console.log("Category deleted successfully:", response);
+      } else {
+        console.error("Failed to delete category:", response);
+      }
+
+      setOpenModal(false);
+    } catch (error) {
+      console.error("Error:", error);
     }
   };
 
@@ -81,7 +164,7 @@ function CategoryPage() {
             <input
               onChange={(e) => handleSearch(e)}
               type="text"
-              id="table-search-users"
+              id="table-search-categories"
               className="block p-2 ps-10 text-sm input input-bordered"
               placeholder="Search for category"
             />
@@ -97,8 +180,8 @@ function CategoryPage() {
             </div>
           </div>
         </div>
-        <table className="table-auto w-full text-sm text-left rtl:text-right text-gray-500 ">
-          <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
+        <table className="table-auto w-full text-sm text-left rtl:text-right text-gray-500">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
               <th scope="col" className="px-6 py-3">
                 ID
@@ -106,35 +189,45 @@ function CategoryPage() {
               <th scope="colspan-2" className="px-12 py-6">
                 Name
               </th>
-              <th scope="col" className="px-12py-6"></th>
+              <th scope="col" className="px-12 py-6"></th>
               <th scope="col" className="px-6 py-3">
                 Action
               </th>
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
-              <tr className="bg-white border-b hover:bg-gray-50">
+            {categories.map((category) => (
+              <tr
+                key={category.id}
+                className="bg-white border-b hover:bg-gray-50"
+              >
                 <th
                   scope="row"
                   className="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap"
                 >
-                  <p>{user.id}</p>
+                  <p>{category.id}</p>
                 </th>
                 <th scope="colspan-2" className="px-12 py-4">
-                  <p>{user.name}</p>
+                  <p>{category.name}</p>
                 </th>
                 <th className="px-12 py-4"></th>
                 <td className="pl-6 py-4">
                   <Link
-                    onClick={() => handleOpenModal("Edit Category", true)}
+                    onClick={() =>
+                      handleOpenModal("Edit Category", true, false, category.id)
+                    }
                     className="font-medium text-blue-600 dark:text-blue-500 hover:underline mr-4"
                   >
                     Edit
                   </Link>
                   <Link
                     onClick={() =>
-                      handleOpenModal("Detele Category", false, true)
+                      handleOpenModal(
+                        "Delete Category",
+                        false,
+                        true,
+                        category.id
+                      )
                     }
                     className="font-medium text-blue-600 dark:text-blue-500 hover:underline"
                   >
@@ -146,73 +239,65 @@ function CategoryPage() {
           </tbody>
         </table>
         {openModal && (
-          <>
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <div className="bg-white rounded-lg shadow-lg w-96">
-                <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                  <h3 className="text-lg font-semibold">{title}</h3>
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg shadow-lg w-96">
+              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 className="text-lg font-semibold">{title}</h3>
+                <button
+                  onClick={() => {
+                    setOpenModal(false);
+                    setIsDelete(false);
+                    setIsEdit(false);
+                  }}
+                  className="text-gray-600 hover:text-gray-800"
+                >
+                  &times;
+                </button>
+              </div>
+              <div className="p-6">
+                {isDelete ? (
+                  <p>Are you sure you want to delete this category?</p>
+                ) : (
+                  <input
+                    type="text"
+                    placeholder={
+                      isEdit ? "Edit Category" : "Enter new category"
+                    }
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="input input-bordered w-full max-w-lg"
+                  />
+                )}
+              </div>
+              <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-4">
+                {isDelete ? (
                   <button
-                    onClick={() => setOpenModal(false)}
-                    className="text-gray-600 hover:text-gray-800"
+                    onClick={() => handleDelete(categoryId)}
+                    className="px-4 py-2 bg-green-600 text-white rounded"
                   >
-                    &times;
+                    Delete
                   </button>
-                </div>
-                <div className="p-6">
-                  {isDetele ? (
-                    <p>Are you to delete this Category?</p>
-                  ) : isEdit ? (
-                    <input
-                      type="text"
-                      placeholder="Edit Category"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="input input-bordered w-full max-w-lg"
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      placeholder="Enter new category"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="input input-bordered w-full max-w-lg"
-                    />
-                  )}
-                </div>
-                <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-4">
-                  {isDetele ? (
-                    <button
-                      onClick={() => setOpenModal(false)}
-                      className="px-4 py-2 bg-green-600 text-white rounded"
-                    >
-                      Delete
-                    </button>
-                  ) : isEdit ? (
-                    <button
-                      onClick={() => setOpenModal(false)}
-                      className="px-4 py-2 bg-green-600 text-white rounded"
-                    >
-                      Edit
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => setOpenModal(false)}
-                      className="px-4 py-2 bg-green-600 text-white rounded"
-                    >
-                      Create
-                    </button>
-                  )}
-
+                ) : (
                   <button
-                    onClick={() => setOpenModal(false)}
-                    className="px-4 py-2 bg-red-600 text-white rounded"
+                    onClick={isEdit ? handleUpdate : handleCreate}
+                    className="px-4 py-2 bg-green-600 text-white rounded"
                   >
-                    Cancel
+                    {isEdit ? "Update" : "Create"}
                   </button>
-                </div>
+                )}
+                <button
+                  onClick={() => {
+                    setOpenModal(false);
+                    setIsDelete(false);
+                    setIsEdit(false);
+                  }}
+                  className="px-4 py-2 bg-red-600 text-white rounded"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
-          </>
+          </div>
         )}
       </div>
     </AdminLayout>

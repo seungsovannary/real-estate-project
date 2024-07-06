@@ -6,6 +6,13 @@ import SellerLayout from "../../Layouts/SellerLayout";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import axios from "axios";
+import { app } from "../../config/firebaseconfig";
+import {
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
 import L from "leaflet";
 
 // Remove the default icon URLs to fix the missing icon issue
@@ -320,6 +327,29 @@ const CreatePostPage = () => {
     }
   };
 
+  const handleUploadDisplayImg = (e) => {
+    const file = e.target.files[0];
+    const storage = getStorage(app);
+    if (file) {
+      const fileName = new Date().getTime() + file.name;
+      const storageRef = ref(storage, `images/${fileName}`);
+      const uploadTask = uploadBytesResumable(storageRef, file);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {},
+        (error) => {
+          console.error("Upload error:", error);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            setDisplayImage(downloadURL);
+          });
+        }
+      );
+    }
+  };
+
   const getBase64 = (file) =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -328,15 +358,15 @@ const CreatePostPage = () => {
       reader.onerror = reject;
     });
 
-  const handleUploadDisplayImg = async (e) => {
-    e.preventDefault();
+  // const handleUploadDisplayImg = async (e) => {
+  //   e.preventDefault();
 
-    const inputData = e.target.files[0];
-    const base64Url = await getBase64(inputData);
+  //   const inputData = e.target.files[0];
+  //   const base64Url = await getBase64(inputData);
 
-    setDisplayImage(base64Url);
-    setDisplayFileImage(inputData);
-  };
+  //   setDisplayImage(base64Url);
+  //   setDisplayFileImage(inputData);
+  // };
 
   const handleDelete = async (inputData) => {
     setDisplayImage("");
@@ -639,13 +669,12 @@ const CreatePostPage = () => {
               </select>
 
               {/* Dropdown for village selection */}
-              <select
+              {/* <select
                 value={selectedVillage}
                 onChange={handleVillageChange}
                 className="border border-gray-300 rounded-lg p-2 mb-4"
               >
                 <option value="">Select a town...</option>
-                {/* Populate towns based on selected state */}
                 {towns?.map((town, index) => {
                   if (selectedTown === town.name) {
                     return (
@@ -665,7 +694,7 @@ const CreatePostPage = () => {
                   }
                   return null;
                 })}
-              </select>
+              </select> */}
             </div>
 
             {/* Map container */}
