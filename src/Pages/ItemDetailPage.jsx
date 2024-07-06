@@ -407,9 +407,7 @@ const ItemDetailPage = () => {
             </div> */}
             {loading ? (
               ""
-            ) : user?.id !== "" &&
-              user.role_id !== "1" &&
-              user.id !== data.user_id ? (
+            ) : !user && user?.role_id !== "1" && user?.id !== data?.user_id ? (
               saved ? (
                 <button className="btn btn-primary" onClick={handleUnsave}>
                   <BookMarked />

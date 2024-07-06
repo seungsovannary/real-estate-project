@@ -1,6 +1,29 @@
 import MainLayout from "../Layouts/MainLayout";
 import ItemCard from "../components/ItemCard";
 import { useEffect, useState } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import axios from "axios";
+import L from "leaflet";
+
+// Remove the default icon URLs to fix the missing icon issue
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png",
+});
+
+const UpdateMapView = ({ location }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (location) {
+      map.setView([location.lat, location.lng], 15); // Set the view to the new location with zoom level 15
+    }
+  }, [location, map]);
+  return null;
+};
 
 const BrowsePage = () => {
   const [searchValue, setSearchValue] = useState("");
@@ -13,6 +36,8 @@ const BrowsePage = () => {
   });
   const [sizeRange, setSizeRange] = useState({ min_size: "", max_size: "" });
   const [stateName, setStateName] = useState("");
+  const [location, setLocation] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const getCategories = async () => {
     const baseUrl = process.env.REACT_APP_API_URL + "/categories";
@@ -127,114 +152,94 @@ const BrowsePage = () => {
     getList({ state_name: e.target.value });
   };
 
+  const handleItemClick = (item) => {
+    setLocation({ lat: item.latitude, lng: item.longitude });
+    setSelectedItem(item);
+  };
+
+  const handleMarkerClick = (item) => {
+    setSelectedItem(item);
+  };
+
   const filteredData = data.filter((item) => item?.status === "approved");
 
   return (
     <MainLayout>
-      <div className="max-w-screen-2xl mx-auto px-2 flex flex-col justify-center items-center py-10">
-        <section>
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-4 gap-5 border p-1 sm:p-2 md:p-3 rounded-lg bg-gray-100">
-            <input
-              type="text"
-              value={searchValue}
-              onChange={handleSearch}
-              placeholder="Enter name"
-              className="input input-bordered w-full col-2"
-            />
-            <select
-              className="select select-bordered w-full max-w-xs"
-              defaultValue="type"
-              onChange={handleChangeType}
-            >
-              <option value="type" disabled>
-                Type
-              </option>
-              <option value="">All</option>
-              <option value="rent">Rent</option>
-              <option value="sale">Sale</option>
-              <option value="booking">Booking</option>
-            </select>
-
-            <select
-              className="select select-bordered w-full max-w-xs"
-              defaultValue="category"
-              onChange={handleChangeCategory}
-            >
-              <option value="category" disabled>
-                Category
-              </option>
-              <option value="">All</option>
-              {categories.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-
-            <div className="flex space-x-2">
-              <input
-                type="number"
-                name="min_price"
-                value={priceRange.min_price}
-                onChange={handleChangePrice}
-                placeholder="Min Price"
-                className="input input-bordered w-full col"
-              />
-              <input
-                type="number"
-                name="max_price"
-                value={priceRange.max_price}
-                onChange={handleChangePrice}
-                placeholder="Max Price"
-                className="input input-bordered w-full col"
-              />
-            </div>
-
-            <div className="flex space-x-2">
-              <input
-                type="number"
-                name="min_size"
-                value={sizeRange.min_size}
-                onChange={handleChangeSize}
-                placeholder="Min Size"
-                className="input input-bordered w-full col"
-              />
-              <input
-                type="number"
-                name="max_size"
-                value={sizeRange.max_size}
-                onChange={handleChangeSize}
-                placeholder="Max Size"
-                className="input input-bordered w-full col"
-              />
-            </div>
-
-            <select
-              className="select select-bordered w-full max-w-xs"
-              defaultValue="state"
-              onChange={handleChangeState}
-            >
-              <option value="state" disabled>
-                City/Province
-              </option>
-              <option value="">All</option>
-              {states.map((item) => (
-                <option key={item.id} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        </section>
-              
-        <section className="w-full my-10">
+      <div className="max-w-screen-2xl mx-auto px-2 flex flex-col justify-center items-center py-2">
+        <section className="w-full h-screen">
           <div className="w-full flex items-center justify-between">
             <h1 className="text-3xl font-semibold">Browse</h1>
           </div>
-          <div className="mt-5 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 lg:gap-7">
-            {filteredData.map((item) => {
-              return <ItemCard key={item.id} item={item} />;
-            })}
+          <div className="flex w-full h-full">
+            <div className="w-2/6 h-full overflow-y-scroll my-2">
+              {filteredData.map((item) => (
+                <div
+                  className="flex h-32 w-full my-2 shadow-lg cursor-pointer"
+                  key={item.id}
+                  onClick={() => handleItemClick(item)}
+                >
+                  <img
+                    className="h-full w-32 object-cover border"
+                    src={item.image}
+                    alt={item.name}
+                  />
+                  <div className="px-2 flex flex-col justify-between py-2">
+                    <div className="flex flex-col">
+                      <p className="font-bold">{item.name}</p>
+                      <p className="text-sm line-clamp-2">{item.description}</p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm font-bold ">${item.price}</p>
+                      <p className="text-sm font-bold ">{item.category.name}</p>
+                      <p className="text-sm font-bold ">
+                        {item.type.toUpperCase()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="w-4/6 h-full ">
+              <MapContainer
+                center={[11.5449, 104.8922]}
+                zoom={13} // Default zoom level for initial load
+                className="w-full h-full"
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="http://www.thunderforest.com/">Thunderforest</a>, &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                {filteredData.map((item) => (
+                  <Marker
+                    key={item.id}
+                    position={[item.latitude, item.longitude]}
+                    eventHandlers={{
+                      click: () => handleMarkerClick(item),
+                    }}
+                  >
+                    <Popup>
+                      <div  >
+                        <img src={item.image} alt="" />
+                        <p className="font-bold">{item.name}</p>
+                        <p className="text-sm w-full oject-cover">
+                          {item.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-bold ">${item.price}</p>
+                          <p className="text-sm font-bold ">
+                            {item.category.name}
+                          </p>
+                          <p className="text-sm font-bold ">
+                            {item.type.toUpperCase()}
+                          </p>
+                        </div>
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+                <UpdateMapView location={location} />
+              </MapContainer>
+            </div>
           </div>
         </section>
       </div>
